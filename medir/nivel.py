@@ -9,8 +9,8 @@ A escada (o nível vem do que ficou registrado no log, não de opinião):
   AL1  você faz sozinho, a IA não entra ........ só no papel (registro/papel.csv)
   AL2  a IA ajuda: você pergunta, ela responde .. conversa com menos de 5 ações da IA por mensagem sua
   AL3  a IA colabora, passo a passo com você .... 5 a 14 ações por mensagem sua
-  AL4  a IA conduz e você só revisa ............. 15 ou mais ações por mensagem sua
-  AL5  a IA roda sozinha ......................... sessão sem conversa (timer, script, bot), no máximo 1 pedido
+  AL4  a IA conduz e você só revisa ............. 15 ou mais ações por mensagem sua, ou pedido seu feito pelo bot (Telegram)
+  AL5  a IA roda sozinha ......................... sessão aberta por script, bot ou timer (claude -p, codex exec), sem conversa
 
 Uso:
   nivel.py varrer    [--dias 30]          lê os logs e grava registro/sessoes.json
@@ -129,7 +129,9 @@ def fecha(s):
         return None
     s['inicio'] = min(s['tempos'])
     s['minutos'] = round(ativo(s.pop('tempos')), 1)
-    s['automatica'] = s.get('automatica') or s['humanos'] <= 1
+    # AL5 = ninguém conversando: aberta por script, bot ou timer (claude -p / codex exec) ou sem nenhuma mensagem sua.
+    # Uma pergunta solta no terminal NÃO é AL5: vai pela conta de ações por mensagem (AL2 a AL4).
+    s['automatica'] = bool(s.get('automatica')) or s['humanos'] == 0
     s['primeiro'] = limpa(s['primeiro'])
     s['conexoes'] = dict(s['conexoes'])
     s['nivel'] = nivel(s)
@@ -137,6 +139,8 @@ def fecha(s):
 
 
 def nivel(s):
+    if s.get('via_bot'):  # pedido de uma pessoa pelo bot (Telegram etc.): a IA conduz o pedido inteiro e a pessoa revisa o resultado
+        return 'AL4'
     if s['automatica']:
         return 'AL5'
     k = s['acoes'] / max(s['humanos'], 1)
@@ -158,6 +162,8 @@ def ler_claude(caminho):
                 if tipo not in ('user', 'assistant') or d.get('isSidechain'):
                     continue
                 s['pasta'] = s['pasta'] or d.get('cwd') or ''
+                if d.get('entrypoint') and 'automatica' not in s:
+                    s['automatica'] = d['entrypoint'] != 'cli'  # sdk-cli/sdk-ts = claude -p chamado por script, bot ou timer
                 x = epoch(d.get('timestamp'))
                 if x:
                     s['tempos'].append(x)
@@ -168,6 +174,8 @@ def ler_claude(caminho):
                         texto = ' '.join(str(b.get('text', '')) for b in c if isinstance(b, dict) and b.get('type') == 'text')
                     if texto and (not texto.startswith('<') or '<command-name>' in texto):
                         s['humanos'] += 1
+                        if MARCA_BOT.search(texto):
+                            s['via_bot'] = True
                         if not MOLDURA.match(texto):
                             s['primeiro'] = s['primeiro'] or texto
                 elif isinstance(c, list):
@@ -271,7 +279,27 @@ def tarefa_de(texto, tarefas):
 
 
 # ---------------------------------------------------------------- ficha de papel
-COLUNAS_PAPEL = ['data', 'tarefa', 'nivel', 'minutos', 'conexao', 'corrigi']
+COLUNAS_PAPEL = ['data', 'tarefa', 'nivel', 'minutos', 'conexao', 'corrigi', 'grave']
+
+
+SINONIMOS = {'date': 'data', 'fecha': 'data', 'task': 'tarefa', 'tarea': 'tarefa', 'level': 'nivel', 'nível': 'nivel',
+             'minutes': 'minutos', 'connection': 'conexao', 'conexão': 'conexao', 'conexion': 'conexao', 'conexión': 'conexao',
+             'fixed': 'corrigi', 'corregí': 'corrigi', 'corregi': 'corrigi', 'serious': 'grave', 'error grave': 'grave', 'erro grave': 'grave'}
+
+
+def sim(v):
+    return str(v).strip().lower()[:1] in ('s', 'y')  # sim, sí, yes
+
+
+def correcao(v):
+    """Coluna corrigi?: n = não precisei · p = correção pequena · g = correção grande (ou não ajudou).
+    Aceita sim/sí/yes/s/y como grande, e no/não/n como nenhuma."""
+    t = str(v).strip().lower()
+    if t[:1] in ('p', 'm', 'l') or t.startswith('small') or t.startswith('peque'):  # pequena, menor, leve, small, pequeña
+        return 'p'
+    if t[:1] in ('g', 'b', 's', 'y'):  # grande, big, sim/sí, yes
+        return 'g'
+    return 'n'
 
 
 def ler_papel(arq):
@@ -286,7 +314,8 @@ def ler_papel(arq):
     sep = ';' if texto.split('\n', 1)[0].count(';') > texto.split('\n', 1)[0].count(',') else ','
     linhas, erros = [], []
     for i, r in enumerate(csv.DictReader(io.StringIO(texto), delimiter=sep), 2):
-        r = {(k or '').strip().lower(): (v or '').strip() for k, v in r.items()}
+        r = {(k or '').strip().lower().rstrip('?').strip(): (v or '').strip() for k, v in r.items()}
+        r = {SINONIMOS.get(k, k): v for k, v in r.items()}
         nv = r.get('nivel', '').upper().replace(' ', '')
         nv = nv if nv.startswith('AL') else 'AL' + nv
         try:
@@ -301,7 +330,8 @@ def ler_papel(arq):
             erros.append(f'linha {i}: tarefa vazia')
         else:
             linhas.append(dict(data=r.get('data', ''), tarefa=r['tarefa'], nivel=nv, minutos=minutos,
-                               conexao=r.get('conexao', ''), corrigi=r.get('corrigi', '').lower().startswith('s')))
+                               conexao=r.get('conexao', ''), corrigi=correcao(r.get('corrigi', '')) == 'g',
+                               pequena=correcao(r.get('corrigi', '')) == 'p', grave=sim(r.get('grave', ''))))
     return linhas, erros
 
 
@@ -330,8 +360,9 @@ def montar(sessoes, papel, tarefas, dias):
         prox = None if nv >= teto else NIVEIS[NIVEIS.index(nv) + 1]
         lista.append(dict(tarefa=nome, horas_semana=round(g['min'] / 60 / semanas, 1), vezes=g['n'], nivel=nv,
                           critica=critica, proximo=prox, papel=g['papel'], corrigi=g['corrigi'],
+                          decisao=decidir(prox, [p for p in papel if p['tarefa'] == nome]),
                           mistura={k: round(v / sum(g['niv'].values()) * 100) for k, v in g['niv'].most_common()}))
-    conex = registro_conexoes(sess)
+    conex = registro_conexoes(sess, papel)
     return dict(gerado_em=datetime.now().astimezone().isoformat(timespec='seconds'), dias=dias,
                 escada={n: round(100 * por_nivel[n] / total, 1) for n in NIVEIS},
                 parte_ia=round(100 * (por_nivel['AL4'] + por_nivel['AL5']) / total, 1),
@@ -342,8 +373,50 @@ def montar(sessoes, papel, tarefas, dias):
                 tarefas=lista, conexoes=conex)
 
 
-def registro_conexoes(sess):
+# critério para subir AO degrau indicado: (vezes anotadas no degrau atual, máximo de correções GRANDES nessas vezes).
+# AL1 → AL2 não tem critério: é só começar a perguntar (o risco é baixo).
+CRITERIO = {'AL3': (10, 1), 'AL4': (20, 2), 'AL5': (50, 2)}
+DESCER_GRANDES = 3  # 3 correções grandes nas últimas 10 vezes = descer (1 erro grave = descer na hora)
+
+
+def decidir(proximo, linhas):
+    """Lê a ficha da tarefa (ordem de data) e diz: descer, subir, anotar ou manter. Descer vem primeiro,
+    e nunca conflita com subir: subir aceita no máximo 2 correções grandes, descer pede 3 ou um erro grave."""
+    linhas = sorted(linhas, key=lambda l: l['data'])
+    ult10 = linhas[-10:]
+    graves = [l for l in ult10 if l.get('grave')]
+    if graves:
+        return {'acao': 'descer', 'motivo': f"erro grave em {graves[-1]['data'] or 'uma das últimas vezes'}"}
+    grandes = sum(l['corrigi'] for l in ult10)
+    if grandes >= DESCER_GRANDES:
+        return {'acao': 'descer', 'motivo': f"{grandes} correções grandes nas últimas {len(ult10)} vezes"}
+    if not proximo:
+        return {'acao': 'manter', 'motivo': 'no teto desta tarefa'}
+    if proximo == 'AL2':
+        return {'acao': 'subir', 'motivo': 'para começar a perguntar à IA não há critério'}
+    n, maxc = CRITERIO[proximo]
+    if not linhas:
+        return {'acao': 'anotar', 'motivo': f"anote na ficha as próximas {n} vezes, com a coluna corrigi?"}
+    janela = linhas[-n:]
+    erros = sum(l['corrigi'] for l in janela)
+    if len(janela) < n:
+        return {'acao': 'anotar', 'motivo': f"{len(janela)} de {n} vezes anotadas"}
+    if erros <= maxc:
+        return {'acao': 'subir', 'motivo': f"{n} vezes anotadas, {erros} com correção grande (limite {maxc})"}
+    return {'acao': 'manter', 'motivo': f"{erros} correções grandes nas últimas {n} vezes (limite {maxc})"}
+
+
+def registro_conexoes(sess, papel=()):
     c = {}
+    for p in papel:  # a coluna "conexão" da ficha também é registrada (ChatGPT no navegador, planilha, e-mail...)
+        for nome in re.split(r'\s*[+,;/]\s*', p['conexao']):
+            if not nome.strip():
+                continue
+            dia = p['data'] or '?'
+            r = c.setdefault('papel:' + nome.strip().lower()[:40], {'conexao': 'papel:' + nome.strip().lower()[:40], 'usos': 0, 'sessoes': 0,
+                                                                  'primeira': dia, 'ultima': dia, 'sozinha': 0})
+            r['usos'] += 1; r['sessoes'] += 1; r['sozinha'] += p['nivel'] == 'AL5'
+            r['primeira'] = min(r['primeira'], dia); r['ultima'] = max(r['ultima'], dia)
     for s in sess:
         dia = datetime.fromtimestamp(s['inicio']).date().isoformat()
         for k, v in s['conexoes'].items():
@@ -354,10 +427,10 @@ def registro_conexoes(sess):
 
 
 O_QUE_SUBIR = {
-    'AL2': 'Pergunte à IA antes de fazer na mão. Pronto para subir quando você usou a resposta dela em 5 vezes seguidas.',
-    'AL3': 'Dê à IA o contexto fixo (instruções, exemplos, onde ficam os arquivos) e faça junto. Pronto quando 10 execuções seguidas saíram com no máximo 1 correção grande.',
-    'AL4': 'Deixe a IA preparar tudo e só revise antes de sair. Pronto quando 9 de cada 10 saíram sem você mudar nada, em pelo menos 20 execuções.',
-    'AL5': 'Ponha num timer, com teto, alarme e um jeito de voltar atrás. Só quando 95% passaram na revisão em 50 execuções e nenhum erro foi grave.',
+    'AL2': 'Comece a perguntar à IA antes de fazer na mão. Não há critério: o risco é baixo.',
+    'AL3': 'Dê à IA o contexto fixo (instruções, exemplos, onde ficam os arquivos) e faça junto. Pronto quando 10 vezes seguidas saíram com no máximo 1 correção grande.',
+    'AL4': 'Deixe a IA preparar tudo e só revise antes de sair. Pronto quando, em 20 vezes, no máximo 2 precisaram de correção grande.',
+    'AL5': 'Ponha num timer, com teto, alarme e um jeito de voltar atrás. Só quando, em 50 vezes, no máximo 2 precisaram de correção grande e nenhuma teve erro grave.',
 }
 
 
@@ -372,13 +445,25 @@ def markdown(r, anterior):
         L += ['', 'AL1 está em 0% porque o que você faz sem IA não aparece nos logs. Anote na ficha de papel (registro/papel.csv) para entrar na conta.']
     L += ['', '## Suas tarefas', '', 'Tarefa | h/sem | Vezes | Nível | Próximo degrau', '--- | --- | --- | --- | ---']
     for t in r['tarefas'][:12]:
-        L.append(f"{t['tarefa']}{' (crítica, teto AL4)' if t['critica'] else ''} | {t['horas_semana']} | {t['vezes']} | {t['nivel']} | {t['proximo'] or 'no teto'}")
-    cand = [t for t in r['tarefas'] if t['proximo'] and t['vezes'] >= 5][:3]
-    if cand:
-        L += ['', '## Quem pode subir um degrau agora', '']
-        for t in cand:
-            L.append(f"- **{t['tarefa']}**: {t['nivel']} → {t['proximo']}. {O_QUE_SUBIR[t['proximo']]}")
-        L += ['', 'Quem decide é você, olhando o registro. Errou feio? Desce um degrau naquela tarefa e anota o motivo.']
+        prox = 'voltar ao AL4' if t['critica'] and t['nivel'] == 'AL5' else (t['proximo'] or 'no teto')
+        L.append(f"{t['tarefa']}{' (crítica, teto AL4)' if t['critica'] else ''} | {t['horas_semana']} | {t['vezes']} | {t['nivel']} | {prox}")
+    alerta = [t for t in r['tarefas'] if t['critica'] and t['mistura'].get('AL5', 0) >= 10]
+    if alerta:
+        L += ['', '## Atenção: tarefa crítica rodando sozinha', '']
+        L += [f"- **{t['tarefa']}**: {t['mistura']['AL5']}% do tempo em AL5. Tarefa crítica para no AL4: confira se tem revisão, alarme e volta." for t in alerta]
+    desce = [t for t in r['tarefas'] if t['decisao']['acao'] == 'descer']
+    sobe = [t for t in r['tarefas'] if t['decisao']['acao'] == 'subir']
+    falta = [t for t in r['tarefas'] if t['decisao']['acao'] == 'anotar' and t['vezes'] >= 5][:3]
+    if desce:
+        L += ['', '## Descer um degrau', '']
+        L += [f"- **{t['tarefa']}**: {t['nivel']} → {NIVEIS[max(NIVEIS.index(t['nivel']) - 1, 0)]} ({t['decisao']['motivo']}). Anote o motivo." for t in desce]
+    if sobe:
+        L += ['', '## Pode subir um degrau agora (critério cumprido na ficha)', '']
+        L += [f"- **{t['tarefa']}**: {t['nivel']} → {t['proximo']} ({t['decisao']['motivo']}). {O_QUE_SUBIR[t['proximo']]}" for t in sobe]
+    if falta:
+        L += ['', '## Candidatas a subir: falta medir o acerto', '']
+        L += [f"- **{t['tarefa']}**: {t['nivel']} → {t['proximo']}. {t['decisao']['motivo'][0].upper() + t['decisao']['motivo'][1:]}. Critério: {O_QUE_SUBIR[t['proximo']]}" for t in falta]
+    L += ['', 'Quem decide é você. O programa vê quanta liberdade a IA teve; se ela acertou, só as colunas "corrigi?" e "erro grave" da ficha dizem.']
     tipos = collections.Counter(c['conexao'].split(':', 1)[0] for c in r['conexoes'])
     L += ['', f"## Conexões registradas ({len(r['conexoes'])})", '',
           'Por tipo: ' + ' · '.join(f'{k} {v}' for k, v in tipos.most_common()) + '.', '', 'Conexão | Sessões | Usos | Primeira | Última | Sozinha',

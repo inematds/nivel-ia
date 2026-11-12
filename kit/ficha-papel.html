@@ -25,7 +25,7 @@
 </head>
 <body>
 <h1>Ficha da escada: em que degrau está cada tarefa?</h1>
-<p class="sub">Uma linha por tarefa feita. Ao fim da semana, some os minutos por degrau. As colunas são as mesmas do medidor automático (<code>registro/papel.csv</code>).</p>
+<p class="sub">Uma linha por tarefa feita. Ao fim da semana, some os minutos por degrau. As colunas são as mesmas do medidor automático do kit, para quem quiser digitar depois.</p>
 
 <div class="escada">
   <div class="degrau"><b>AL1 · Você faz sozinho</b>A IA não entra.</div>
@@ -36,32 +36,32 @@
 </div>
 
 <table>
-  <thead><tr><th style="width:11%">Data</th><th style="width:31%">Tarefa</th><th style="width:9%">Degrau (1 a 5)</th><th style="width:9%">Minutos</th><th style="width:26%">Conexão usada (qual IA, programa, site, e-mail, pasta)</th><th style="width:14%">Corrigi? (s/n)</th></tr></thead>
+  <thead><tr><th style="width:10%">Data</th><th style="width:28%">Tarefa</th><th style="width:8%">Degrau (1 a 5)</th><th style="width:8%">Minutos</th><th style="width:22%">Conexão usada (qual IA, programa, site, e-mail, pasta)</th><th style="width:13%">Corrigi?<br><small>n = não · p = pequena · g = grande ou não ajudou</small></th><th style="width:11%">Erro grave?<br><small>s / n</small></th></tr></thead>
   <tbody>
-    <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
   </tbody>
 </table>
 
 <div class="rodape">
-  <div><b>Subir um degrau</b> (uma tarefa por vez):<br>
-    AL1→AL2: usou a resposta da IA 5 vezes seguidas.<br>
-    AL2→AL3: 10 seguidas com no máximo 1 correção grande.<br>
-    AL3→AL4: 9 de 10 sem mudar nada, em 20 ou mais.<br>
-    AL4→AL5: 95% aprovadas em 50, nenhum erro grave, com timer, alarme e volta. Tarefa crítica para no AL4.</div>
+  <div><b>Subir um degrau</b> (uma tarefa por vez; quem decide é você, olhando esta ficha):<br>
+    AL1→AL2: sem critério, comece a perguntar à IA e anote AL2.<br>
+    AL2→AL3: nas últimas 10 vezes, no máximo 1 com g.<br>
+    AL3→AL4: nas últimas 20 vezes, no máximo 2 com g.<br>
+    AL4→AL5: nas últimas 50 vezes, no máximo 2 com g e nenhum erro grave; com horário, alarme e volta. Tarefa crítica (publicar, dinheiro, servidor, cliente) para no AL4.</div>
   <div><b>Descer um degrau</b> naquela tarefa:<br>
     1 erro grave (saiu errado para fora, perdeu dado, gastou o que não devia),<br>
-    ou 2 correções grandes em 10,<br>
+    ou 3 vezes com g nas últimas 10,<br>
     ou mudou a ferramenta ou o processo.<br>
     Anote o motivo. Descer é o registro funcionando.</div>
 </div>

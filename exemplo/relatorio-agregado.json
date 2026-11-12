@@ -1,77 +1,77 @@
 {
  "nota": "Exemplo real agregado: medição do trabalho do Nei Maldaner (INEMA) nos últimos 30 dias até a data. Só totais: sem pedidos, pastas nem sites.",
- "gerado_em": "2026-11-12T14:45:38-03:00",
+ "gerado_em": "2026-11-12T14:55:27-03:00",
  "dias": 30,
  "escada": {
   "AL1": 0.0,
-  "AL2": 3.8,
-  "AL3": 40.8,
-  "AL4": 32.2,
-  "AL5": 23.2
+  "AL2": 2.0,
+  "AL3": 22.6,
+  "AL4": 12.0,
+  "AL5": 63.4
  },
- "parte_ia": 55.3,
+ "parte_ia": 75.4,
  "fontes": {
-  "claude": 9423,
-  "codex": 6870,
-  "conversas": 1320,
-  "sozinhas": 14973,
-  "acoes": 132888,
-  "externos": 5868,
+  "claude": 9424,
+  "codex": 6881,
+  "conversas": 471,
+  "sozinhas": 15834,
+  "acoes": 133164,
+  "externos": 5872,
   "papel": 0
  },
  "tarefas": [
   {
    "tarefa": "Produzir vídeos",
-   "horas_semana": 79.5,
-   "vezes": 3092,
-   "nivel": "AL3",
+   "horas_semana": 79.6,
+   "vezes": 3093,
+   "nivel": "AL5",
    "critica": false,
-   "proximo": "AL4",
+   "proximo": null,
    "mistura": {
-    "AL3": 41,
-    "AL4": 40,
-    "AL5": 16,
-    "AL2": 2
+    "AL5": 61,
+    "AL3": 23,
+    "AL4": 15,
+    "AL2": 1
    }
   },
   {
    "tarefa": "Criar guias, kits e sites",
-   "horas_semana": 41.3,
-   "vezes": 1581,
-   "nivel": "AL3",
+   "horas_semana": 41.5,
+   "vezes": 1582,
+   "nivel": "AL5",
    "critica": false,
-   "proximo": "AL4",
+   "proximo": null,
    "mistura": {
-    "AL3": 46,
-    "AL4": 39,
-    "AL5": 10,
-    "AL2": 4
+    "AL5": 61,
+    "AL3": 28,
+    "AL4": 10,
+    "AL2": 2
    }
   },
   {
    "tarefa": "Outras tarefas",
    "horas_semana": 36.8,
-   "vezes": 3116,
-   "nivel": "AL3",
+   "vezes": 3122,
+   "nivel": "AL5",
    "critica": false,
-   "proximo": "AL4",
+   "proximo": null,
    "mistura": {
-    "AL3": 36,
-    "AL5": 35,
-    "AL4": 22,
-    "AL2": 7
+    "AL5": 71,
+    "AL3": 17,
+    "AL4": 7,
+    "AL2": 4
    }
   },
   {
    "tarefa": "Imagens e design",
    "horas_semana": 13.7,
-   "vezes": 2580,
+   "vezes": 2583,
    "nivel": "AL5",
    "critica": false,
    "proximo": null,
    "mistura": {
-    "AL5": 74,
-    "AL3": 21,
+    "AL5": 86,
+    "AL3": 9,
     "AL4": 5,
     "AL2": 0
    }
@@ -80,14 +80,14 @@
    "tarefa": "Publicar e divulgar",
    "horas_semana": 7.0,
    "vezes": 1171,
-   "nivel": "AL3",
+   "nivel": "AL5",
    "critica": true,
-   "proximo": "AL4",
+   "proximo": null,
    "mistura": {
-    "AL3": 49,
-    "AL4": 28,
-    "AL5": 21,
-    "AL2": 2
+    "AL5": 58,
+    "AL3": 27,
+    "AL4": 15,
+    "AL2": 1
    }
   },
   {
@@ -98,10 +98,10 @@
    "critica": false,
    "proximo": null,
    "mistura": {
-    "AL5": 65,
-    "AL3": 28,
-    "AL2": 4,
-    "AL4": 3
+    "AL5": 81,
+    "AL3": 14,
+    "AL4": 3,
+    "AL2": 2
    }
   },
   {
@@ -112,57 +112,57 @@
    "critica": false,
    "proximo": "AL4",
    "mistura": {
-    "AL3": 78,
-    "AL2": 12,
-    "AL4": 7,
-    "AL5": 2
+    "AL3": 47,
+    "AL5": 38,
+    "AL2": 8,
+    "AL4": 7
    }
   },
   {
    "tarefa": "Criar cursos e aulas",
    "horas_semana": 5.2,
    "vezes": 44,
-   "nivel": "AL4",
+   "nivel": "AL5",
    "critica": false,
-   "proximo": "AL5",
+   "proximo": null,
    "mistura": {
-    "AL4": 58,
-    "AL3": 41,
-    "AL5": 1
+    "AL5": 43,
+    "AL4": 36,
+    "AL3": 20
    }
   },
   {
    "tarefa": "Manter sistemas e bots",
    "horas_semana": 3.8,
-   "vezes": 57,
-   "nivel": "AL4",
+   "vezes": 58,
+   "nivel": "AL3",
    "critica": true,
-   "proximo": null,
+   "proximo": "AL4",
    "mistura": {
-    "AL4": 50,
-    "AL3": 42,
-    "AL2": 7,
-    "AL5": 1
+    "AL3": 35,
+    "AL5": 34,
+    "AL4": 26,
+    "AL2": 5
    }
   },
   {
    "tarefa": "E-mail e agenda",
    "horas_semana": 0.4,
    "vezes": 11,
-   "nivel": "AL3",
+   "nivel": "AL5",
    "critica": true,
-   "proximo": "AL4",
+   "proximo": null,
    "mistura": {
-    "AL3": 70,
-    "AL4": 27,
-    "AL5": 4
+    "AL5": 49,
+    "AL3": 35,
+    "AL4": 16
    }
   }
  ],
- "conexoes_total": 8003,
+ "conexoes_total": 8005,
  "conexoes_por_tipo": {
   "serviço": 19,
-  "programa": 7663,
+  "programa": 7665,
   "site": 290,
   "web": 2,
   "agente": 7,
@@ -171,88 +171,88 @@
  "conexoes_top": [
   {
    "conexao": "serviço:codex image_gen__imagegen",
-   "sessoes": 5245,
-   "sozinha": 5245
+   "sessoes": 5256,
+   "sozinha": 5256
   },
   {
    "conexao": "serviço:codex view_image",
-   "sessoes": 1436,
-   "sozinha": 1428
+   "sessoes": 1441,
+   "sozinha": 1433
   },
   {
    "conexao": "programa:git",
-   "sessoes": 773,
-   "sozinha": 104
+   "sessoes": 774,
+   "sozinha": 404
   },
   {
    "conexao": "programa:ffmpeg",
    "sessoes": 750,
-   "sozinha": 123
+   "sozinha": 554
   },
   {
    "conexao": "programa:curl",
    "sessoes": 549,
-   "sozinha": 74
+   "sozinha": 363
   },
   {
    "conexao": "serviço:plugin_context-mode_context-mode",
    "sessoes": 333,
-   "sozinha": 69
+   "sozinha": 235
   },
   {
    "conexao": "programa:codex",
-   "sessoes": 327,
-   "sozinha": 14
+   "sessoes": 328,
+   "sozinha": 210
   },
   {
    "conexao": "programa:gh",
    "sessoes": 318,
-   "sozinha": 12
+   "sozinha": 159
   },
   {
    "conexao": "serviço:metricool-inematds",
    "sessoes": 288,
-   "sozinha": 259
+   "sozinha": 275
   },
   {
    "conexao": "agente:general-purpose",
-   "sessoes": 242,
-   "sozinha": 1
+   "sessoes": 243,
+   "sozinha": 117
   },
   {
    "conexao": "programa:yt-pubx",
    "sessoes": 197,
-   "sozinha": 13
+   "sozinha": 101
   },
   {
    "conexao": "skill:atualiza-portal",
    "sessoes": 189,
-   "sozinha": 0
+   "sozinha": 94
   },
   {
    "conexao": "skill:postar-telegram",
    "sessoes": 131,
-   "sozinha": 0
+   "sozinha": 57
   },
   {
    "conexao": "skill:session-handoff",
    "sessoes": 109,
-   "sozinha": 0
+   "sozinha": 29
   },
   {
    "conexao": "skill:projetos-landing-guia",
-   "sessoes": 107,
-   "sozinha": 0
+   "sessoes": 108,
+   "sozinha": 45
   },
   {
    "conexao": "agente:geral",
    "sessoes": 97,
-   "sozinha": 22
+   "sozinha": 87
   },
   {
    "conexao": "skill:r7ex",
    "sessoes": 63,
-   "sozinha": 0
+   "sozinha": 29
   },
   {
    "conexao": "serviço:metricool-pub2",
@@ -260,14 +260,14 @@
    "sozinha": 53
   },
   {
-   "conexao": "skill:prime",
+   "conexao": "serviço:codex sleep",
    "sessoes": 25,
-   "sozinha": 0
+   "sozinha": 19
   },
   {
-   "conexao": "serviço:codex imagegen",
-   "sessoes": 24,
-   "sozinha": 24
+   "conexao": "skill:prime",
+   "sessoes": 25,
+   "sozinha": 7
   }
  ]
 }

@@ -2,3 +2,4 @@ registro/*
 !registro/.gitkeep
 __pycache__/
 *.pyc
+logs/

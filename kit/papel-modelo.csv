@@ -1,6 +1,6 @@
-data,tarefa,nivel,minutos,conexao,corrigi
-2026-11-10,Reunião com cliente,AL1,60,,n
-2026-11-10,Responder e-mail de cliente,AL2,15,ChatGPT,n
-2026-11-11,Escrever post da semana,AL3,30,Claude,s
-2026-11-11,Relatório de vendas,AL4,10,Claude + planilha,n
-2026-11-12,Legendas dos vídeos,AL5,5,script no timer,n
+data,tarefa,nivel,minutos,conexao,corrigi,grave
+2026-11-10,Reunião com cliente,AL1,60,,n,n
+2026-11-10,Responder e-mail de cliente,AL2,15,ChatGPT,n,n
+2026-11-11,Escrever post da semana,AL3,30,Claude,p,n
+2026-11-11,Relatório de vendas,AL4,10,Claude + planilha,g,n
+2026-11-12,Legendas dos vídeos,AL5,5,script no horário,n,n

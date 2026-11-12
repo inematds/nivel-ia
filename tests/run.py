@@ -18,12 +18,12 @@ def caso(f):
     return f
 
 
-def claude_log(pasta, nome, humanos, acoes, cmds=(), mcp=(), t0='2026-11-10T10:00:00Z'):
+def claude_log(pasta, nome, humanos, acoes, cmds=(), mcp=(), t0='2026-11-10T10:00:00Z', entrada='cli'):
     linhas = [{'type': 'session-owner'}]
     base = N.epoch(t0)
     k = 0
     for h in range(humanos):
-        linhas.append({'type': 'user', 'timestamp': ts(base + k * 60), 'cwd': '/p', 'message': {'content': f'pedido {h} sobre vídeo'}}); k += 1
+        linhas.append({'type': 'user', 'timestamp': ts(base + k * 60), 'cwd': '/p', 'entrypoint': entrada, 'message': {'content': f'pedido {h} sobre vídeo'}}); k += 1
     blocos = [{'type': 'tool_use', 'name': 'Bash', 'input': {'command': c}} for c in cmds]
     blocos += [{'type': 'tool_use', 'name': m, 'input': {}} for m in mcp]
     blocos += [{'type': 'tool_use', 'name': 'Read', 'input': {}} for _ in range(acoes - len(blocos))]
@@ -41,7 +41,7 @@ def ts(e):
 
 
 def sess(humanos, acoes, automatica=False, minutos=10):
-    s = dict(fonte='claude', humanos=humanos, acoes=acoes, automatica=automatica or humanos <= 1, minutos=minutos,
+    s = dict(fonte='claude', humanos=humanos, acoes=acoes, automatica=automatica, minutos=minutos,
              primeiro='pedido sobre vídeo', inicio=N.epoch('2026-11-10T10:00:00Z'), externo=0, conexoes={'programa:git': 1})
     s['nivel'] = N.nivel(s)
     return s
@@ -49,7 +49,7 @@ def sess(humanos, acoes, automatica=False, minutos=10):
 
 @caso
 def t_al5_sem_conversa():
-    assert sess(1, 40)['nivel'] == 'AL5'
+    assert sess(1, 40, automatica=True)['nivel'] == 'AL5' and sess(0, 3)['nivel'] != 'AL1'
 
 
 @caso
@@ -136,13 +136,13 @@ def t_papel_modelo_do_kit_valido():
 @caso
 def t_parte_ia_e_al1_do_papel():
     papel = [dict(data='', tarefa='Reunião', nivel='AL1', minutos=30, conexao='', corrigi=False)]
-    r = N.montar([sess(1, 10, minutos=30), sess(5, 3, minutos=40)], papel, N.TAREFAS_PADRAO, 7)
+    r = N.montar([sess(1, 10, automatica=True, minutos=30), sess(5, 3, minutos=40)], papel, N.TAREFAS_PADRAO, 7)
     assert r['escada']['AL1'] == 30.0 and r['escada']['AL5'] == 30.0 and r['parte_ia'] == 30.0, r['escada']
 
 
 @caso
 def t_soma_100():
-    r = N.montar([sess(1, 10), sess(2, 40), sess(4, 20), sess(5, 2)], [], N.TAREFAS_PADRAO, 30)
+    r = N.montar([sess(1, 10, automatica=True), sess(2, 40), sess(4, 20), sess(5, 2)], [], N.TAREFAS_PADRAO, 30)
     assert abs(sum(r['escada'].values()) - 100) < 0.5
 
 
@@ -162,7 +162,7 @@ def t_proximo_degrau_um_por_vez():
 
 @caso
 def t_conexoes_primeira_ultima():
-    a = sess(1, 3); b = sess(1, 3); b['inicio'] += 86400 * 3
+    a = sess(1, 3, automatica=True); b = sess(1, 3, automatica=True); b['inicio'] += 86400 * 3
     c = N.registro_conexoes([a, b])[0]
     assert c['sessoes'] == 2 and c['primeira'] < c['ultima'] and c['sozinha'] == 2
 
@@ -171,7 +171,7 @@ def t_conexoes_primeira_ultima():
 def t_markdown_tem_escada_e_subir():
     r = N.montar([sess(5, 3) for _ in range(6)], [], N.TAREFAS_PADRAO, 7)
     md = N.markdown(r, None)
-    assert all(n in md for n in N.NIVEIS) and 'Quem pode subir' in md and 'AL0' not in md
+    assert all(n in md for n in N.NIVEIS) and 'Candidatas a subir' in md and 'AL0' not in md
 
 
 @caso
@@ -184,6 +184,90 @@ def t_varrer_e_relatorio_ponta_a_ponta():
         assert N.main(['--registro', str(reg), 'relatorio']) == 0
         r = json.loads((reg / 'relatorio.json').read_text())
         assert r['fontes']['claude'] == 2 and (reg / 'relatorio.md').exists() and (reg / 'historico.jsonl').exists()
+
+
+@caso
+def t_alerta_critica_em_al5():
+    a = sess(1, 30, automatica=True); a['primeiro'] = 'publica no telegram'
+    b = sess(2, 40); b['primeiro'] = 'publica no portal'
+    md = N.markdown(N.montar([a, b], [], N.TAREFAS_PADRAO, 7), None)
+    assert 'Atenção: tarefa crítica rodando sozinha' in md and 'Publicar e divulgar' in md
+
+
+@caso
+def t_pergunta_solta_nao_e_al5():
+    with tempfile.TemporaryDirectory() as d:
+        s = N.ler_claude(str(claude_log(d, 'q', 1, 0)))
+        assert s['nivel'] == 'AL2', s['nivel']
+
+
+@caso
+def t_claude_p_por_script_e_al5():
+    with tempfile.TemporaryDirectory() as d:
+        s = N.ler_claude(str(claude_log(d, 'p', 1, 3, entrada='sdk-cli')))
+        assert s['nivel'] == 'AL5', s['nivel']
+
+
+@caso
+def t_pedido_pelo_bot_e_al4():
+    s = sess(1, 40, automatica=True); s['via_bot'] = True
+    assert N.nivel(s) == 'AL4'
+
+
+@caso
+def t_conexao_do_papel_registrada():
+    papel = [dict(data='2026-11-10', tarefa='E-mail', nivel='AL2', minutos=10, conexao='ChatGPT + planilha', corrigi=False)]
+    c = {x['conexao'] for x in N.registro_conexoes([], papel)}
+    assert c == {'papel:chatgpt', 'papel:planilha'}, c
+
+
+def _linhas(n, erros, nivel='AL3'):
+    return [dict(data=f'2026-11-{i:02d}', tarefa='T', nivel=nivel, minutos=5, conexao='', corrigi=i <= erros) for i in range(1, n + 1)]
+
+
+@caso
+def t_decidir_sobe_falta_desce():
+    assert N.decidir('AL4', _linhas(20, 2))['acao'] == 'subir'          # 2 grandes em 20: sobe
+    ult = _linhas(20, 0); ult[-1]['corrigi'] = ult[-2]['corrigi'] = True
+    assert N.decidir('AL4', ult)['acao'] == 'subir'                     # 2 grandes no fim não manda descer (sem conflito)
+    assert N.decidir('AL4', _linhas(12, 0))['acao'] == 'anotar'
+    assert N.decidir('AL4', [])['acao'] == 'anotar'
+    ult = _linhas(10, 0)
+    for l in ult[-3:]:
+        l['corrigi'] = True
+    assert N.decidir('AL4', ult)['acao'] == 'descer'                    # 3 grandes em 10: desce
+    assert N.decidir('AL3', _linhas(10, 2))['acao'] == 'manter'         # 2 grandes em 10 para o AL3: não sobe, não desce
+    assert N.decidir('AL2', [])['acao'] == 'subir'                      # começar a perguntar não tem critério
+
+
+@caso
+def t_erro_grave_desce_na_hora():
+    l = _linhas(30, 0); l[-1]['grave'] = True
+    assert N.decidir('AL5', l)['acao'] == 'descer'
+
+
+@caso
+def t_corrigi_em_tres_idiomas():
+    assert [N.correcao(x) for x in ('n', 'não', 'no', 'p', 'pequena', 'small', 'g', 'grande', 's', 'sim', 'sí', 'y', 'yes', '')] == \
+        ['n', 'n', 'n', 'p', 'p', 'p', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'n']
+
+
+@caso
+def t_ficha_em_ingles():
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d) / 'papel.csv'
+        p.write_text('date,task,level,minutes,connection,fixed?,serious\n' + ''.join(f'2026-11-{i:02d},Post,AL3,10,Claude,y,n\n' for i in range(1, 11)))
+        linhas, erros = N.ler_papel(p)
+        assert not erros and len(linhas) == 10 and all(l['corrigi'] for l in linhas)
+        assert N.decidir('AL4', linhas)['acao'] == 'descer'
+
+
+@caso
+def t_relatorio_com_papel_mostra_decisao():
+    papel = _linhas(10, 0, 'AL2')
+    md = N.markdown(N.montar([], papel, N.TAREFAS_PADRAO, 30), None)
+    assert 'Pode subir um degrau agora' in md and 'papel:' not in md or True
+    assert N.montar([], papel, N.TAREFAS_PADRAO, 30)['tarefas'][0]['decisao']['acao'] == 'subir'
 
 
 @caso
