@@ -17,12 +17,12 @@ Na dúvida, faça três perguntas sobre a tarefa:
 
 ## Como anotar (a mesma regra na ficha e no programa)
 
-Cada vez que fizer a tarefa, uma linha na ficha com o degrau em que você **fez** a tarefa naquela vez e duas colunas de acerto:
+Cada vez que fizer a tarefa, uma linha na ficha (data como dd/mm/aaaa ou aaaa-mm-dd) com o degrau em que você **fez** a tarefa naquela vez, se a tarefa é **crítica** (s/n) e duas colunas de acerto:
 
 - **corrigi?** `n` = não precisei mexer · `p` = correção pequena (vírgula, tom) · `g` = correção grande (refiz um pedaço, ou a resposta não ajudou).
 - **erro grave?** `s` quando saiu errado para fora, perdeu dado ou gastou o que não devia; senão `n`.
 
-Só as correções **grandes** e os erros **graves** entram nas contas abaixo. A ficha em inglês ou espanhol pode usar y/yes/sí no lugar de `g`/`s`.
+Só as correções **grandes** e os erros **graves** entram nas contas abaixo, e só as vezes do **degrau atual**: quando você sobe ou desce, a conta daquela tarefa recomeça. A ficha em inglês ou espanhol pode usar y/yes/sí no lugar de `g`/`s`.
 
 ## Como subir de nível
 

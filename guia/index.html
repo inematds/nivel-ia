@@ -162,6 +162,7 @@
   @media(max-width:600px){table.n{font-size:.8rem}table.n th,table.n td{padding:6px 5px}}
   table.tnum td:not(:first-child),table.tnum th:not(:first-child){white-space:nowrap}
   table.n td:first-child{overflow-wrap:break-word}
+  @media(max-width:600px){pre{white-space:pre-wrap;word-break:break-word}}
 </style>
 </head>
 <body>
@@ -224,7 +225,7 @@
 
 <section id="subir"><div class="wrap">
   <h2>Como subir de nível</h2>
-  <p class="sub">Uma tarefa por vez, <strong>um degrau por vez</strong>. Cada vez que fizer a tarefa, anote na ficha o degrau em que fez e duas colunas de acerto: <b>corrigi?</b> (n = não precisei mexer, p = correção pequena, g = correção grande ou a resposta não ajudou) e <b>erro grave?</b> (s/n). Só as correções grandes e os erros graves entram na conta. <strong>Quem decide é você</strong>: o relatório confere as contas e diz "pode subir", "anote mais" ou "descer"; se você discordar, vale a sua decisão, com o motivo anotado. Os números são ponto de partida.</p>
+  <p class="sub">Uma tarefa por vez, <strong>um degrau por vez</strong>. Cada vez que fizer a tarefa, anote na ficha a data, se a tarefa é crítica, o degrau em que fez e duas colunas de acerto: <b>corrigi?</b> (n = não precisei mexer, p = correção pequena, g = correção grande ou a resposta não ajudou) e <b>erro grave?</b> (s/n). Só as correções grandes e os erros graves entram na conta, e só as vezes do degrau atual: mudou de degrau, a conta recomeça. <strong>Quem decide é você</strong>: o relatório confere as contas e diz "pode subir", "anote mais" ou "descer"; se você discordar, vale a sua decisão, com o motivo anotado. Os números são ponto de partida.</p>
   <div class="passos">
     <div class="ps"><div class="pt"><span>AL1</span>→<span>AL2</span></div><h3>Comece a perguntar</h3>
       <p><b>Escolha</b> uma tarefa que você repete pelo menos 3 vezes por mês e que não tem dado sigiloso.</p>
@@ -244,7 +245,7 @@
       <p class="ok"><b>Pronto quando</b>, nas últimas 50 vezes, no máximo 2 tiveram correção grande e nenhuma teve erro grave.</p></div>
   </div>
   <div class="duo">
-    <div class="card teto"><h3>🛑 Tarefa crítica para no AL4</h3><p>Quando um erro causa prejuízo público, financeiro ou de segurança (publicar, dinheiro, servidor, cliente), a IA conduz e você revisa. Ela não vai para o AL5.</p></div>
+    <div class="card teto"><h3>🛑 Tarefa crítica para no AL4</h3><p>Quando um erro causa prejuízo público, financeiro ou de segurança (publicar, dinheiro, servidor, cliente), a IA conduz e você revisa. Ela não vai para o AL5. Marque "crítica? = s" na ficha; o programa também reconhece pelas palavras (publicar, cliente, servidor, e-mail).</p></div>
     <div class="card desce"><h3>⬇️ Quando descer um degrau</h3><p><b>Um erro grave</b> (saiu errado para fora, perdeu dado, gastou o que não devia): desce na hora. <b>Três correções grandes nas últimas 10 vezes</b>: desce. Como subir aceita no máximo duas, as regras nunca se contradizem. Se a ferramenta ou o processo mudou, volte um degrau por conta própria até medir de novo. Vale para qualquer degrau, inclusive o AL5.</p></div>
   </div>
 </div></section>
@@ -253,7 +254,7 @@
   <h2>Como medir: no papel ou automático</h2>
   <p class="sub">Você só sobe o que consegue ver. Sem registro, o degrau vira palpite.</p>
   <div class="grid g3">
-    <div class="card"><h3>📝 No papel</h3><p>Uma ficha para imprimir. A cada tarefa: data, tarefa, degrau (1 a 5), minutos, conexão usada (qual IA, programa, site, pasta), se precisou corrigir (n/p/g) e se houve erro grave. Serve para qualquer IA e é o único jeito de contar o AL1, o que você faz sem IA. <a href="https://inematds.github.io/nivel-ia/kit/ficha-papel.html" target="_blank" rel="noopener">Abrir a ficha para imprimir</a>.</p></div>
+    <div class="card"><h3>📝 No papel</h3><p>Uma ficha para imprimir. A cada tarefa: data, tarefa, se é crítica, degrau (1 a 5), minutos, conexão usada (qual IA, programa, site, pasta), se precisou corrigir (n/p/g) e se houve erro grave. Serve para qualquer IA e é o único jeito de contar o AL1, o que você faz sem IA. <a href="https://inematds.github.io/nivel-ia/kit/ficha-papel.html" target="_blank" rel="noopener">Abrir a ficha para imprimir</a>.</p></div>
     <div class="card"><h3>🤖 Automático</h3><p>Para quem usa o Claude Code ou o Codex (assistentes de IA que trabalham dentro do computador). Um programa lê os registros deles, põe cada conversa num degrau e anota toda conexão usada: programas, sites, serviços externos, ajudantes da IA e receitas prontas (skills), com a primeira e a última vez. Pode rodar sozinho todo dia. <a href="#guia">Como usar ↓</a></p></div>
     <div class="card"><h3>🔗 As mesmas colunas</h3><p>Papel e programa usam as mesmas colunas. Comece no papel hoje e, quando quiser, digite a ficha numa planilha: o relatório junta as duas coisas, inclusive as conexões que você anotou (ChatGPT, planilha, e-mail).</p></div>
   </div>
@@ -292,7 +293,7 @@
         <tr><td>Pesquisar e resumir</td><td>5,2</td><td>AL3</td><td>AL4</td></tr>
         <tr><td>Manter sistemas e bots ⚠️</td><td>3,8</td><td>AL3</td><td>AL4 (teto)</td></tr>
       </table>
-      <p class="cap" style="margin-top:10px">Recorte: as 7 tarefas nomeadas com mais horas (ficam de fora "Outras tarefas", 36,8 h, e duas menores). ⚠️ = tarefa crítica, que para no AL4. "Publicar" tem 58% do tempo rodando sozinho e "E-mail e agenda", 49%: o relatório avisa, e é aí que se confere se há revisão, alarme e volta.</p>
+      <p class="cap" style="margin-top:10px">Recorte de 7 tarefas do relatório (ficam de fora "Outras tarefas", 36,8 h, "Criar cursos e aulas", 5,2 h, e "E-mail e agenda", 0,4 h). ⚠️ = tarefa crítica, que para no AL4. "Publicar" tem 58% do tempo rodando sozinho e "E-mail e agenda", 49%: o relatório avisa, e é aí que se confere se há revisão, alarme e volta.</p>
     </div>
   </div>
   <div class="card" style="margin-top:22px"><h3>🔗 8.005 conexões registradas em 30 dias</h3>
@@ -350,12 +351,12 @@
 <pre><span class="k">python3 medir/nivel.py relatorio</span>   <span class="c"># "A IA conduz 75.4% do trabalho medido (AL4 + AL5)"</span></pre></div></div>
   <div class="step"><div class="b">4</div><div><h3>Veja todas as conexões</h3><p>Cada programa, site, serviço, agente e skill, com o número de sessões e a primeira e a última vez.</p>
 <pre><span class="k">python3 medir/nivel.py conexoes</span></pre></div></div>
-  <div class="step"><div class="b">5</div><div><h3>Junte a ficha de papel (e o AL1)</h3><p>Copie o modelo, digite as linhas da ficha e confira. O próximo relatório soma tudo.</p>
+  <div class="step"><div class="b">5</div><div><h3>Junte a ficha de papel (e o AL1)</h3><p>Copie o modelo, digite as linhas da ficha (data como dd/mm/aaaa ou aaaa-mm-dd; os nomes das colunas podem ser os da ficha impressa, em português, inglês ou espanhol) e confira. O próximo relatório soma tudo.</p>
 <pre><span class="k">cp</span> kit/papel-modelo.csv registro/papel.csv
 <span class="k">python3 medir/nivel.py papel</span>   <span class="c"># "5 linhas válidas"</span></pre></div></div>
   <div class="step"><div class="b">6</div><div><h3>Deixe rodar sozinho todo dia</h3><p>Liga um timer às 06:20 que mede e guarda o histórico em <code>registro/historico.jsonl</code>.</p>
 <pre><span class="k">sh systemd/instalar.sh</span>   <span class="c"># desfazer: systemctl --user disable --now nivel-ia.timer</span></pre></div></div>
-  <div class="step"><div class="b">7</div><div><h3>Uma vez por semana, decida</h3><p>Escolha UMA tarefa para subir um degrau pelo critério acima, e desça a que errou feio. Testes do kit: <code>python3 tests/run.py</code> (31 testes com registros falsos).</p></div></div>
+  <div class="step"><div class="b">7</div><div><h3>Uma vez por semana, decida</h3><p>Escolha UMA tarefa para subir um degrau pelo critério acima, e desça a que errou feio. Testes do kit: <code>python3 tests/run.py</code> (36 testes com registros falsos).</p></div></div>
 </div></section>
 
 <section id="limites"><div class="wrap">

@@ -31,7 +31,7 @@ A escada completa, com **como subir cada degrau e quando descer**, está em [ESC
 Quem faz: 🧠 você · ⚙️ script ou timer
 
 1. 🧠 **Leia a escada** e escolha 3 tarefas que você faz toda semana: [ESCADA.md](ESCADA.md).
-2. 🧠 **No papel:** imprima a ficha (https://inematds.github.io/nivel-ia/kit/ficha-papel.html) e anote uma linha por tarefa (data, tarefa, degrau 1 a 5, minutos, conexão usada, corrigi? n/p/g, erro grave? s/n). Serve para qualquer IA e para o que você faz sem IA (AL1).
+2. 🧠 **No papel:** imprima a ficha (https://inematds.github.io/nivel-ia/kit/ficha-papel.html) e anote uma linha por tarefa (data, tarefa, crítica? s/n, degrau 1 a 5, minutos, conexão usada, corrigi? n/p/g, erro grave? s/n). Serve para qualquer IA e para o que você faz sem IA (AL1).
 3. 🧠 **Digite a ficha** (opcional): copie `kit/papel-modelo.csv` para `registro/papel.csv` e vá preenchendo. Confira com `python3 medir/nivel.py papel`.
 4. ⚙️ **Automático:** `python3 medir/nivel.py varrer --dias 30` lê os logs do Claude Code e do Codex desta máquina e grava `registro/sessoes.json`.
 5. ⚙️ **Relatório:** `python3 medir/nivel.py relatorio` monta a escada, as tarefas, o próximo degrau de cada uma, as conexões e "quem pode subir agora" em `registro/relatorio.md` (junta a ficha de papel se existir).
@@ -48,7 +48,7 @@ Terminal, Python 3.9 ou mais novo (só biblioteca padrão, sem instalar nada) e 
 - **Vê:** sessões do Claude Code (`~/.claude/projects`) e do Codex (`~/.codex*/sessions`), quantas mensagens suas, quantas ações da IA, quanto tempo, que programas, sites, serviços (MCP), agentes e skills ela usou, e quais ações tiveram efeito fora da máquina (publicar, enviar, subir).
 - **Não vê:** o que você faz sem IA (AL1: só na ficha), outras IAs (ChatGPT no navegador: ficha), se você aprovou no prompt, e se a IA acertou (coluna "corrigi?" da ficha).
 - **Como decide o degrau:** sessão aberta por script, bot ou horário (`claude -p`, `codex exec`) = AL5; pedido seu feito pelo bot (Telegram) = AL4; conversa sua no terminal: 15 ou mais ações da IA por mensagem sua = AL4, 5 a 14 = AL3, menos = AL2 (uma pergunta solta é AL2).
-- **Subir e descer:** conferidos pelas colunas "corrigi?" (n/p/g) e "erro grave?" (s/n) da ficha. AL1→AL2 sem critério; AL2→AL3: no máximo 1 correção grande nas últimas 10 vezes; AL3→AL4: no máximo 2 em 20; AL4→AL5: no máximo 2 em 50 e nenhum erro grave. Descer: 1 erro grave ou 3 correções grandes nas últimas 10. Sem ficha, o relatório lista a tarefa como candidata e diz quantas vezes anotar. Detalhes em [ESCADA.md](ESCADA.md). Os limites ficam no topo de `medir/nivel.py`.
+- **Subir e descer:** conferidos pelas colunas "corrigi?" (n/p/g) e "erro grave?" (s/n) da ficha. AL1→AL2 sem critério; AL2→AL3: no máximo 1 correção grande nas últimas 10 vezes; AL3→AL4: no máximo 2 em 20; AL4→AL5: no máximo 2 em 50 e nenhum erro grave. Descer: 1 erro grave ou 3 correções grandes nas últimas 10. Só contam as vezes do degrau atual (mudou de degrau, a conta recomeça). Tarefa crítica (marcada na ficha ou reconhecida pelas palavras: publicar, cliente, servidor, e-mail…) para no AL4. Sem ficha, o relatório lista a tarefa como candidata e diz quantas vezes anotar. Detalhes em [ESCADA.md](ESCADA.md). Os limites ficam no topo de `medir/nivel.py`.
 - **Tarefas:** agrupadas por palavras-chave do primeiro pedido. Para usar as suas, copie `medir/tarefas.exemplo.json` para `medir/tarefas.json` e edite (formato `[["Nome da tarefa", crítica true/false, ["palavra", "outra"]]]`). Tarefa crítica para no AL4.
 
 ## Exemplo real
@@ -57,7 +57,7 @@ Terminal, Python 3.9 ou mais novo (só biblioteca padrão, sem instalar nada) e 
 
 ## Testes
 
-`python3 tests/run.py` (31 testes com logs falsos, nada da sua máquina).
+`python3 tests/run.py` (36 testes com logs falsos, nada da sua máquina).
 
 ## Privacidade
 

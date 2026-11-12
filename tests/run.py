@@ -122,9 +122,9 @@ def t_le_codex():
 def t_papel_valida():
     with tempfile.TemporaryDirectory() as d:
         p = Path(d) / 'papel.csv'
-        p.write_text('data;tarefa;nivel;minutos;conexao;corrigi\n2026-11-10;Reunião;1;60,5;;n\n2026-11-10;X;AL7;5;;n\n2026-11-10;Y;AL3;0;;n\n', encoding='utf-8')
+        p.write_text('data;tarefa;nivel;minutos;conexao;corrigi;grave\n10/11/2026;Reunião;1;60,5;;n;n\n2026-11-10;X;AL7;5;;n;n\n2026-11-10;Y;AL3;0;;n;n\n', encoding='utf-8')
         linhas, erros = N.ler_papel(p)
-        assert len(linhas) == 1 and linhas[0]['nivel'] == 'AL1' and linhas[0]['minutos'] == 60.5 and len(erros) == 2, (linhas, erros)
+        assert len(linhas) == 1 and linhas[0]['nivel'] == 'AL1' and linhas[0]['minutos'] == 60.5 and linhas[0]['data'] == '2026-11-10' and len(erros) == 2, (linhas, erros)
 
 
 @caso
@@ -268,6 +268,56 @@ def t_relatorio_com_papel_mostra_decisao():
     md = N.markdown(N.montar([], papel, N.TAREFAS_PADRAO, 30), None)
     assert 'Pode subir um degrau agora' in md and 'papel:' not in md or True
     assert N.montar([], papel, N.TAREFAS_PADRAO, 30)['tarefas'][0]['decisao']['acao'] == 'subir'
+
+
+def _ficha(linhas):
+    return [dict(data=d, tarefa=t, nivel=n, minutos=5, conexao='', corrigi=c == 'g', pequena=c == 'p', grave=g, critica=False)
+            for d, t, n, c, g in linhas]
+
+
+@caso
+def t_critica_da_ficha_nao_vai_ao_al5():
+    papel = _ficha([(f'2026-09-{i:02d}', 'Publicar post', 'AL4', 'n', False) for i in range(1, 30)] +
+                   [(f'2026-10-{i:02d}', 'Publicar post', 'AL4', 'n', False) for i in range(1, 30)])
+    t = N.montar([], papel, N.TAREFAS_PADRAO, 30)['tarefas'][0]
+    assert t['critica'] and t['proximo'] is None and t['decisao']['acao'] != 'subir', t
+
+
+@caso
+def t_janela_so_do_degrau_atual():
+    papel = _ficha([(f'2026-10-{i:02d}', 'Post', 'AL2', 'n', False) for i in range(1, 11)] +
+                   [(f'2026-11-{i:02d}', 'Post', 'AL3', 'n', False) for i in range(1, 11)])
+    t = N.montar([], papel, N.TAREFAS_PADRAO, 30)['tarefas'][0]
+    assert t['nivel'] == 'AL3' and t['decisao']['acao'] == 'anotar' and '10 de 20' in t['decisao']['motivo'], t['decisao']
+
+
+@caso
+def t_erro_grave_nao_desce_duas_vezes():
+    papel = _ficha([('2026-10-03', 'Post', 'AL3', 'g', True)] + [(f'2026-10-{i:02d}', 'Post', 'AL2', 'n', False) for i in range(4, 9)])
+    t = N.montar([], papel, N.TAREFAS_PADRAO, 30)['tarefas'][0]
+    assert t['nivel'] == 'AL2' and t['decisao']['acao'] != 'descer', t['decisao']
+
+
+@caso
+def t_datas_brasileiras_em_ordem():
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d) / 'papel.csv'
+        rows = [f'0{i}/09/2026,Post,AL3,10,,g,n' for i in range(1, 4)] + [f'{i:02d}/11/2026,Post,AL3,10,,n,n' for i in range(1, 11)]
+        p.write_text('Data,Tarefa,Degrau (1 a 5),Minutos,Conexão usada,Corrigi?,Erro grave?\n' + '\n'.join(rows) + '\n', encoding='utf-8')
+        linhas, erros = N.ler_papel(p)
+        assert not erros, erros
+        assert N.decidir('AL4', linhas, 'AL3')['acao'] != 'descer'
+
+
+@caso
+def t_cabecalhos_impressos_en_es():
+    with tempfile.TemporaryDirectory() as d:
+        for cab, sim in (('Date,Task,Step (1 to 5),Minutes,Connection used,Fixed?,Serious error?', 'yes'),
+                         ('Fecha,Tarea,Peldaño (1 a 5),Minutos,Conexión usada,¿Corregí?,¿Error grave?', 'sí')):
+            p = Path(d) / 'papel.csv'
+            p.write_text(cab + f'\n2026-11-10,Post,AL3,10,Claude,g,{sim}\n', encoding='utf-8')
+            linhas, erros = N.ler_papel(p)
+            assert not erros and linhas[0]['grave'] and linhas[0]['corrigi'], (cab, erros, linhas)
 
 
 @caso

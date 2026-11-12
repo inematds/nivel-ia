@@ -282,7 +282,32 @@ def tarefa_de(texto, tarefas):
 COLUNAS_PAPEL = ['data', 'tarefa', 'nivel', 'minutos', 'conexao', 'corrigi', 'grave']
 
 
-SINONIMOS = {'date': 'data', 'fecha': 'data', 'task': 'tarefa', 'tarea': 'tarefa', 'level': 'nivel', 'nível': 'nivel',
+def data_iso(t):
+    """aaaa-mm-dd fica; dd/mm/aaaa ou dd/mm/aa vira aaaa-mm-dd (para as "últimas vezes" saírem na ordem certa)."""
+    t = str(t).strip()
+    m = re.match(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})$', t)
+    if m:
+        d, mes, a = m.groups()
+        a = ('20' + a) if len(a) == 2 else a
+        return f'{a}-{int(mes):02d}-{int(d):02d}'
+    return t
+
+
+def chave_coluna(k):
+    k = re.sub(r'[¿?¡!:()]', '', (k or '').strip().lower())
+    k = re.sub(r'\s+', ' ', k).strip()
+    if k in SINONIMOS or k in COLUNAS_PAPEL:
+        return SINONIMOS.get(k, k)
+    for nome in sorted(list(SINONIMOS) + COLUNAS_PAPEL + ['critica'], key=len, reverse=True):  # "Degrau (1 a 5)", "Conexão usada (qual IA...)"
+        if k.startswith(nome):
+            return SINONIMOS.get(nome, nome)
+    return k
+
+
+SINONIMOS = {'step': 'nivel', 'degrau': 'nivel', 'peldaño': 'nivel', 'peldano': 'nivel', 'rung': 'nivel', 'degrau 1 a 5': 'nivel',
+             'serious error': 'grave', 'critical': 'critica', 'crítica': 'critica', 'crítico': 'critica', 'critico': 'critica',
+             'corrigi': 'corrigi', 'error grave': 'grave', 'erro grave': 'grave', 'minutes': 'minutos', 'tarefa': 'tarefa',
+             'date': 'data', 'fecha': 'data', 'task': 'tarefa', 'tarea': 'tarefa', 'level': 'nivel', 'nível': 'nivel',
              'minutes': 'minutos', 'connection': 'conexao', 'conexão': 'conexao', 'conexion': 'conexao', 'conexión': 'conexao',
              'fixed': 'corrigi', 'corregí': 'corrigi', 'corregi': 'corrigi', 'serious': 'grave', 'error grave': 'grave', 'erro grave': 'grave'}
 
@@ -313,9 +338,13 @@ def ler_papel(arq):
         texto = bruto.decode('cp1252')
     sep = ';' if texto.split('\n', 1)[0].count(';') > texto.split('\n', 1)[0].count(',') else ','
     linhas, erros = [], []
-    for i, r in enumerate(csv.DictReader(io.StringIO(texto), delimiter=sep), 2):
-        r = {(k or '').strip().lower().rstrip('?').strip(): (v or '').strip() for k, v in r.items()}
-        r = {SINONIMOS.get(k, k): v for k, v in r.items()}
+    leitor = csv.DictReader(io.StringIO(texto), delimiter=sep)
+    cols = {chave_coluna(c) for c in (leitor.fieldnames or [])}
+    for falta in ('tarefa', 'nivel', 'minutos', 'corrigi', 'grave'):
+        if falta not in cols:
+            erros.append(f'coluna "{falta}" não encontrada (cabeçalho lido: {", ".join(leitor.fieldnames or [])})')
+    for i, r in enumerate(leitor, 2):
+        r = {chave_coluna(k): (v or '').strip() for k, v in r.items()}
         nv = r.get('nivel', '').upper().replace(' ', '')
         nv = nv if nv.startswith('AL') else 'AL' + nv
         try:
@@ -329,7 +358,7 @@ def ler_papel(arq):
         elif not r.get('tarefa'):
             erros.append(f'linha {i}: tarefa vazia')
         else:
-            linhas.append(dict(data=r.get('data', ''), tarefa=r['tarefa'], nivel=nv, minutos=minutos,
+            linhas.append(dict(data=data_iso(r.get('data', '')), tarefa=r['tarefa'], nivel=nv, minutos=minutos, critica=sim(r.get('critica', '')),
                                conexao=r.get('conexao', ''), corrigi=correcao(r.get('corrigi', '')) == 'g',
                                pequena=correcao(r.get('corrigi', '')) == 'p', grave=sim(r.get('grave', ''))))
     return linhas, erros
@@ -355,12 +384,16 @@ def montar(sessoes, papel, tarefas, dias):
     lista = []
     for nome, g in sorted(agg.items(), key=lambda kv: -kv[1]['min']):
         nv = g['niv'].most_common(1)[0][0]
-        critica = bool(regras.get(nome))
+        linhas = sorted([p for p in papel if p['tarefa'] == nome], key=lambda l: l['data'])
+        if linhas:
+            nv = linhas[-1]['nivel']  # na ficha, o degrau atual é o da última vez anotada
+        # crítica: pela lista de tarefas, pelas palavras (ex.: "Publicar post" cai em "Publicar e divulgar") ou marcada na ficha
+        critica = bool(regras.get(nome)) or bool(regras.get(tarefa_de(nome, tarefas))) or any(l.get('critica') for l in linhas)
         teto = 'AL4' if critica else 'AL5'
         prox = None if nv >= teto else NIVEIS[NIVEIS.index(nv) + 1]
         lista.append(dict(tarefa=nome, horas_semana=round(g['min'] / 60 / semanas, 1), vezes=g['n'], nivel=nv,
                           critica=critica, proximo=prox, papel=g['papel'], corrigi=g['corrigi'],
-                          decisao=decidir(prox, [p for p in papel if p['tarefa'] == nome]),
+                          decisao=decidir(prox, linhas, nv),
                           mistura={k: round(v / sum(g['niv'].values()) * 100) for k, v in g['niv'].most_common()}))
     conex = registro_conexoes(sess, papel)
     return dict(gerado_em=datetime.now().astimezone().isoformat(timespec='seconds'), dias=dias,
@@ -379,10 +412,12 @@ CRITERIO = {'AL3': (10, 1), 'AL4': (20, 2), 'AL5': (50, 2)}
 DESCER_GRANDES = 3  # 3 correções grandes nas últimas 10 vezes = descer (1 erro grave = descer na hora)
 
 
-def decidir(proximo, linhas):
+def decidir(proximo, linhas, atual=None):
     """Lê a ficha da tarefa (ordem de data) e diz: descer, subir, anotar ou manter. Descer vem primeiro,
     e nunca conflita com subir: subir aceita no máximo 2 correções grandes, descer pede 3 ou um erro grave."""
     linhas = sorted(linhas, key=lambda l: l['data'])
+    if atual:  # só conta o que foi feito no degrau atual: depois de subir ou descer, a conta recomeça
+        linhas = [l for l in linhas if l['nivel'] == atual]
     ult10 = linhas[-10:]
     graves = [l for l in ult10 if l.get('grave')]
     if graves:
@@ -453,16 +488,20 @@ def markdown(r, anterior):
         L += [f"- **{t['tarefa']}**: {t['mistura']['AL5']}% do tempo em AL5. Tarefa crítica para no AL4: confira se tem revisão, alarme e volta." for t in alerta]
     desce = [t for t in r['tarefas'] if t['decisao']['acao'] == 'descer']
     sobe = [t for t in r['tarefas'] if t['decisao']['acao'] == 'subir']
-    falta = [t for t in r['tarefas'] if t['decisao']['acao'] == 'anotar' and t['vezes'] >= 5][:3]
+    falta = [t for t in r['tarefas'] if t['decisao']['acao'] == 'anotar' and (t['papel'] or t['vezes'] >= 5)][:12]
+    fica = [t for t in r['tarefas'] if t['papel'] and t['decisao']['acao'] == 'manter']
     if desce:
-        L += ['', '## Descer um degrau', '']
+        L += ['', '## Descer um degrau (e anotar o degrau novo daqui em diante)', '']
         L += [f"- **{t['tarefa']}**: {t['nivel']} → {NIVEIS[max(NIVEIS.index(t['nivel']) - 1, 0)]} ({t['decisao']['motivo']}). Anote o motivo." for t in desce]
     if sobe:
         L += ['', '## Pode subir um degrau agora (critério cumprido na ficha)', '']
         L += [f"- **{t['tarefa']}**: {t['nivel']} → {t['proximo']} ({t['decisao']['motivo']}). {O_QUE_SUBIR[t['proximo']]}" for t in sobe]
     if falta:
         L += ['', '## Candidatas a subir: falta medir o acerto', '']
-        L += [f"- **{t['tarefa']}**: {t['nivel']} → {t['proximo']}. {t['decisao']['motivo'][0].upper() + t['decisao']['motivo'][1:]}. Critério: {O_QUE_SUBIR[t['proximo']]}" for t in falta]
+        L += [f"- **{t['tarefa']}**: {t['nivel']} → {t['proximo']}. {t['decisao']['motivo'][0].upper() + t['decisao']['motivo'][1:]}. Critério: {O_QUE_SUBIR[t['proximo']]}" for t in falta if t['proximo']]
+    if fica:
+        L += ['', '## Continue no degrau', '']
+        L += [f"- **{t['tarefa']}**: fica no {t['nivel']} ({t['decisao']['motivo']})." for t in fica]
     L += ['', 'Quem decide é você. O programa vê quanta liberdade a IA teve; se ela acertou, só as colunas "corrigi?" e "erro grave" da ficha dizem.']
     tipos = collections.Counter(c['conexao'].split(':', 1)[0] for c in r['conexoes'])
     L += ['', f"## Conexões registradas ({len(r['conexoes'])})", '',

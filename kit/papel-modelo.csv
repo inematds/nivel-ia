@@ -1,6 +1,6 @@
-data,tarefa,nivel,minutos,conexao,corrigi,grave
-2026-11-10,Reunião com cliente,AL1,60,,n,n
-2026-11-10,Responder e-mail de cliente,AL2,15,ChatGPT,n,n
-2026-11-11,Escrever post da semana,AL3,30,Claude,p,n
-2026-11-11,Relatório de vendas,AL4,10,Claude + planilha,g,n
-2026-11-12,Legendas dos vídeos,AL5,5,script no horário,n,n
+data,tarefa,critica,nivel,minutos,conexao,corrigi,grave
+10/11/2026,Reunião com cliente,n,AL1,60,,n,n
+10/11/2026,Responder e-mail de cliente,s,AL2,15,ChatGPT,n,n
+11/11/2026,Escrever post da semana,n,AL3,30,Claude,p,n
+11/11/2026,Relatório de vendas,n,AL4,10,Claude + planilha,g,n
+12/11/2026,Legendas dos vídeos,n,AL5,5,script no horário,n,n
