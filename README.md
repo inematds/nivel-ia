@@ -32,7 +32,7 @@ Quem faz: 🧠 você · ⚙️ script ou timer
 
 1. 🧠 **Leia a escada** e escolha 3 tarefas que você faz toda semana: [ESCADA.md](ESCADA.md).
 2. 🧠 **No papel:** imprima a ficha (https://inematds.github.io/nivel-ia/kit/ficha-papel.html) e anote uma linha por tarefa (data, tarefa, crítica? s/n, degrau 1 a 5, minutos, conexão usada, corrigi? n/p/g, erro grave? s/n). Serve para qualquer IA e para o que você faz sem IA (AL1).
-3. 🧠 **Digite a ficha** (opcional): copie `kit/papel-modelo.csv` para `registro/papel.csv` e vá preenchendo. Confira com `python3 medir/nivel.py papel`.
+3. 🧠 **Digite a ficha** (opcional): copie `kit/papel-modelo.csv` para `registro/papel.csv`, abra numa planilha, digite as linhas e salve como CSV. Confira com `python3 medir/nivel.py papel`. Quem só usa a ficha pode pular os passos 4 e 6: o relatório sai só com ela.
 4. ⚙️ **Automático:** `python3 medir/nivel.py varrer --dias 30` lê os logs do Claude Code e do Codex desta máquina e grava `registro/sessoes.json`.
 5. ⚙️ **Relatório:** `python3 medir/nivel.py relatorio` monta a escada, as tarefas, o próximo degrau de cada uma, as conexões e "quem pode subir agora" em `registro/relatorio.md` (junta a ficha de papel se existir).
 6. ⚙️ **Todas as conexões:** `python3 medir/nivel.py conexoes` lista cada programa, site, serviço, agente e skill, com a primeira e a última vez.
@@ -57,7 +57,7 @@ Terminal, Python 3.9 ou mais novo (só biblioteca padrão, sem instalar nada) e 
 
 ## Testes
 
-`python3 tests/run.py` (36 testes com logs falsos, nada da sua máquina).
+`python3 tests/run.py` (42 testes com logs falsos, nada da sua máquina).
 
 ## Privacidade
 

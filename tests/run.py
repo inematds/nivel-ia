@@ -271,7 +271,7 @@ def t_relatorio_com_papel_mostra_decisao():
 
 
 def _ficha(linhas):
-    return [dict(data=d, tarefa=t, nivel=n, minutos=5, conexao='', corrigi=c == 'g', pequena=c == 'p', grave=g, critica=False)
+    return [dict(data=d, tarefa=t, nivel=n, minutos=5, conexao='', corrigi=c == 'g', pequena=c == 'p', grave=g, critica=None)
             for d, t, n, c, g in linhas]
 
 
@@ -318,6 +318,49 @@ def t_cabecalhos_impressos_en_es():
             p.write_text(cab + f'\n2026-11-10,Post,AL3,10,Claude,g,{sim}\n', encoding='utf-8')
             linhas, erros = N.ler_papel(p)
             assert not erros and linhas[0]['grave'] and linhas[0]['corrigi'], (cab, erros, linhas)
+
+
+@caso
+def t_cabecalho_com_virgula_avisa():
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d) / 'papel.csv'
+        p.write_text('Data,Tarefa,Crítica?,Degrau,Minutos,Conexão usada (qual IA, programa, site),Corrigi?,Erro grave?\n10/11/2026,Post,n,AL3,10,Claude,g,n\n', encoding='utf-8')
+        linhas, erros = N.ler_papel(p)
+        assert erros and not linhas, (linhas, erros)
+
+
+@caso
+def t_al5_exige_50_sem_grave():
+    l = _ficha([(f'2026-09-{i:02d}', 'Legendas', 'AL4', 'n', i == 3) for i in range(1, 30)] +
+               [(f'2026-10-{i:02d}', 'Legendas', 'AL4', 'n', False) for i in range(1, 22)])
+    assert N.decidir('AL5', l, 'AL4')['acao'] == 'manter'
+
+
+@caso
+def t_critica_no_al5_desce():
+    l = _ficha([('2026-11-01', 'Publicar post', 'AL5', 'n', False)])
+    t = N.montar([], l, N.TAREFAS_PADRAO, 30)['tarefas'][0]
+    assert t['decisao']['acao'] == 'descer' and 'AL4' in t['decisao']['motivo']
+
+
+@caso
+def t_palavras_criticas_prometidas():
+    for nome in ('Responder cliente', 'Reply to customer', 'Publish weekly post', 'Restart server', 'Enviar correo al cliente', 'Orçamento para cliente'):
+        cat = N.tarefa_de(nome, N.TAREFAS_PADRAO)
+        assert dict((n, c) for n, c, _ in N.TAREFAS_PADRAO)[cat], (nome, cat)
+
+
+@caso
+def t_marcar_n_vale_sobre_palavra():
+    l = _ficha([('2026-11-01', 'Reunião com cliente', 'AL2', 'n', False)]); l[0]['critica'] = False
+    assert not N.montar([], l, N.TAREFAS_PADRAO, 30)['tarefas'][0]['critica']
+
+
+@caso
+def t_relatorio_so_com_ficha():
+    with tempfile.TemporaryDirectory() as d:
+        reg = Path(d); (reg / 'papel.csv').write_text((RAIZ / 'kit' / 'papel-modelo.csv').read_text(encoding='utf-8'), encoding='utf-8')
+        assert N.main(['--registro', str(reg), 'relatorio']) == 0 and (reg / 'relatorio.md').exists()
 
 
 @caso

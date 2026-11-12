@@ -17,7 +17,7 @@ Na dúvida, faça três perguntas sobre a tarefa:
 
 ## Como anotar (a mesma regra na ficha e no programa)
 
-Cada vez que fizer a tarefa, uma linha na ficha (data como dd/mm/aaaa ou aaaa-mm-dd) com o degrau em que você **fez** a tarefa naquela vez, se a tarefa é **crítica** (s/n) e duas colunas de acerto:
+Cada vez que fizer a tarefa, uma linha na ficha (data como dd/mm/aaaa ou aaaa-mm-dd) com o degrau em que você **fez** a tarefa naquela vez, se a tarefa é **crítica** (s/n; em branco, o programa decide pelas palavras do nome: publicar, post, cliente, pagamento, dinheiro, servidor, e-mail) e duas colunas de acerto:
 
 - **corrigi?** `n` = não precisei mexer · `p` = correção pequena (vírgula, tom) · `g` = correção grande (refiz um pedaço, ou a resposta não ajudou).
 - **erro grave?** `s` quando saiu errado para fora, perdeu dado ou gastou o que não devia; senão `n`.
@@ -26,7 +26,7 @@ Só as correções **grandes** e os erros **graves** entram nas contas abaixo, e
 
 ## Como subir de nível
 
-Uma tarefa por vez, **um degrau por vez**. **Quem decide é você.** O relatório confere as contas abaixo na sua ficha e diz "pode subir", "anote mais N vezes" ou "descer"; se você discordar dele, vale a sua decisão, anotada com o motivo. Os números são ponto de partida: ajuste ao risco da sua tarefa.
+Uma tarefa por vez, **um degrau por vez**. **Quem decide é você.** O relatório confere as contas abaixo na sua ficha e diz "pode subir", "anote mais N vezes", "continue no degrau" ou "descer"; se você discordar dele, vale a sua decisão, anotada com o motivo. Os números são ponto de partida: ajuste ao risco da sua tarefa.
 
 ### AL1 → AL2: comece a perguntar
 - **Escolha:** uma tarefa que você repete pelo menos 3 vezes por mês e que não tem dado sigiloso.

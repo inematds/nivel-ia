@@ -225,7 +225,7 @@
 
 <section id="subir"><div class="wrap">
   <h2>Como subir de nível</h2>
-  <p class="sub">Uma tarefa por vez, <strong>um degrau por vez</strong>. Cada vez que fizer a tarefa, anote na ficha a data, se a tarefa é crítica, o degrau em que fez e duas colunas de acerto: <b>corrigi?</b> (n = não precisei mexer, p = correção pequena, g = correção grande ou a resposta não ajudou) e <b>erro grave?</b> (s/n). Só as correções grandes e os erros graves entram na conta, e só as vezes do degrau atual: mudou de degrau, a conta recomeça. <strong>Quem decide é você</strong>: o relatório confere as contas e diz "pode subir", "anote mais" ou "descer"; se você discordar, vale a sua decisão, com o motivo anotado. Os números são ponto de partida.</p>
+  <p class="sub">Uma tarefa por vez, <strong>um degrau por vez</strong>. Cada vez que fizer a tarefa, anote na ficha a data, se a tarefa é crítica, o degrau em que fez e duas colunas de acerto: <b>corrigi?</b> (n = não precisei mexer, p = correção pequena, g = correção grande ou a resposta não ajudou) e <b>erro grave?</b> (s/n). Só as correções grandes e os erros graves entram na conta, e só as vezes do degrau atual: mudou de degrau, a conta recomeça. <strong>Quem decide é você</strong>: o relatório confere as contas e diz uma de quatro coisas: "pode subir", "anote mais N vezes", "continue no degrau" ou "descer"; se você discordar, vale a sua decisão, com o motivo anotado. Os números são ponto de partida.</p>
   <div class="passos">
     <div class="ps"><div class="pt"><span>AL1</span>→<span>AL2</span></div><h3>Comece a perguntar</h3>
       <p><b>Escolha</b> uma tarefa que você repete pelo menos 3 vezes por mês e que não tem dado sigiloso.</p>
@@ -245,7 +245,7 @@
       <p class="ok"><b>Pronto quando</b>, nas últimas 50 vezes, no máximo 2 tiveram correção grande e nenhuma teve erro grave.</p></div>
   </div>
   <div class="duo">
-    <div class="card teto"><h3>🛑 Tarefa crítica para no AL4</h3><p>Quando um erro causa prejuízo público, financeiro ou de segurança (publicar, dinheiro, servidor, cliente), a IA conduz e você revisa. Ela não vai para o AL5. Marque "crítica? = s" na ficha; o programa também reconhece pelas palavras (publicar, cliente, servidor, e-mail).</p></div>
+    <div class="card teto"><h3>🛑 Tarefa crítica para no AL4</h3><p>Quando um erro causa prejuízo público, financeiro ou de segurança (publicar, dinheiro, servidor, cliente), a IA conduz e você revisa. Ela não vai para o AL5. Marque "crítica? = s" na ficha. Se a coluna ficar em branco, o programa decide pelas palavras do nome da tarefa (publicar, post, cliente, pagamento, dinheiro, servidor, e-mail); o que você marcar, s ou n, vale sobre as palavras.</p></div>
     <div class="card desce"><h3>⬇️ Quando descer um degrau</h3><p><b>Um erro grave</b> (saiu errado para fora, perdeu dado, gastou o que não devia): desce na hora. <b>Três correções grandes nas últimas 10 vezes</b>: desce. Como subir aceita no máximo duas, as regras nunca se contradizem. Se a ferramenta ou o processo mudou, volte um degrau por conta própria até medir de novo. Vale para qualquer degrau, inclusive o AL5.</p></div>
   </div>
 </div></section>
@@ -297,7 +297,7 @@
     </div>
   </div>
   <div class="card" style="margin-top:22px"><h3>🔗 8.005 conexões registradas em 30 dias</h3>
-    <p>7.665 programas e scripts, 290 sites, 22 receitas prontas (skills), 19 serviços externos, 7 tipos de ajudante da IA (agentes) e 2 tipos de busca na web. Algumas das mais usadas: geração de imagem do Codex (5.256 sessões, todas sozinhas), git, que guarda as versões dos arquivos (774), ffmpeg, que monta vídeo (750), Metricool, que agenda posts nas redes (288 sessões, 275 sozinhas), e a publicação no YouTube (197). É a lista das portas que a IA tem: cada uma é algo que você decidiu abrir, e que o kit mostra quando foi usado pela primeira e pela última vez.</p></div>
+    <p>7.665 programas e scripts, 290 sites, 22 receitas prontas (skills), 19 serviços externos, 7 tipos de ajudante da IA (agentes) e 2 tipos de busca na web. Algumas das mais usadas: geração de imagem do Codex (5.256 sessões, todas sozinhas), git, que guarda as versões dos arquivos (774), ffmpeg, que monta vídeo (750), Metricool, que agenda posts nas redes (288 sessões, 275 sozinhas), e a publicação no YouTube (197). Não entram aqui os comandos de bastidor (listar, copiar, mover arquivos) nem as pastas e arquivos que ela abriu ou alterou: esses ficam só na ficha. É a lista das portas que a IA tem: cada uma é algo que você decidiu abrir, e que o kit mostra quando foi usado pela primeira e pela última vez.</p></div>
 </div></section>
 
 <div id="tecnico" class="techhead"><div class="wrap">
@@ -336,7 +336,7 @@
   <div class="grid g3">
     <div class="card"><h3>Terminal + Python 3.9+</h3><p>Os comandos abaixo são digitados no Terminal (no Mac: Aplicativos › Utilitários › Terminal; no Linux: Ctrl+Alt+T). Python é só biblioteca padrão, nada para instalar. No Windows, use o WSL (o Linux dentro do Windows).</p><pre><span class="k">python3</span> --version</pre></div>
     <div class="card"><h3>git (ou o ZIP)</h3><p>Para baixar o kit. Sem git, baixe o ZIP: <a href="https://github.com/inematds/nivel-ia/archive/refs/heads/main.zip">nivel-ia-main.zip</a>, descompacte e abra o Terminal dentro da pasta.</p></div>
-    <div class="card"><h3>Claude Code ou Codex</h3><p>O medidor lê <code>~/.claude/projects</code> e <code>~/.codex*/sessions</code>. Sem eles, use só a ficha de papel.</p></div>
+    <div class="card"><h3>Claude Code ou Codex</h3><p>O medidor lê <code>~/.claude/projects</code> e <code>~/.codex*/sessions</code>. Sem eles, use só a ficha: pule os passos 2 e 4, faça o passo 5 e rode o passo 3; o relatório sai só com a ficha.</p></div>
     <div class="card"><h3>systemd (opcional)</h3><p>O agendador do Linux, para rodar sozinho todo dia às 06:20.</p></div>
   </div>
 </div></section>
@@ -348,15 +348,15 @@
   <div class="step"><div class="b">2</div><div><h3>Meça os últimos 30 dias</h3><p>Lê os logs desta máquina e grava <code>registro/sessoes.json</code> (fora do git).</p>
 <pre><span class="k">python3 medir/nivel.py varrer</span> --dias 30   <span class="c"># "16701 sessões (9820 Claude Code, 6881 Codex) em 30 dias"</span></pre></div></div>
   <div class="step"><div class="b">3</div><div><h3>Leia o relatório</h3><p>Escada, tarefas, próximo degrau, quem pode subir ou descer e conexões. Fica em <code>registro/relatorio.md</code>. As sessões de bastidor de outros programas ficam de fora, por isso o relatório conta um pouco menos que a varredura.</p>
-<pre><span class="k">python3 medir/nivel.py relatorio</span>   <span class="c"># "A IA conduz 75.4% do trabalho medido (AL4 + AL5)"</span></pre></div></div>
+<pre><span class="k">python3 medir/nivel.py relatorio</span>   <span class="c"># "A IA conduz **75.4%** do trabalho medido (AL4 + AL5)"</span></pre></div></div>
   <div class="step"><div class="b">4</div><div><h3>Veja todas as conexões</h3><p>Cada programa, site, serviço, agente e skill, com o número de sessões e a primeira e a última vez.</p>
 <pre><span class="k">python3 medir/nivel.py conexoes</span></pre></div></div>
-  <div class="step"><div class="b">5</div><div><h3>Junte a ficha de papel (e o AL1)</h3><p>Copie o modelo, digite as linhas da ficha (data como dd/mm/aaaa ou aaaa-mm-dd; os nomes das colunas podem ser os da ficha impressa, em português, inglês ou espanhol) e confira. O próximo relatório soma tudo.</p>
+  <div class="step"><div class="b">5</div><div><h3>Junte a ficha de papel (e o AL1)</h3><p>Copie o modelo para a pasta <code>registro/</code>. Abra <code>registro/papel.csv</code> numa planilha (Excel, LibreOffice ou Google Planilhas), digite uma linha por vez que fez a tarefa, e salve de novo como CSV. Data como dd/mm/aaaa ou aaaa-mm-dd; os nomes das colunas podem ser os da ficha impressa, em português, inglês ou espanhol. Depois confira: o programa avisa se uma linha ou coluna não foi entendida. O próximo relatório soma tudo.</p>
 <pre><span class="k">cp</span> kit/papel-modelo.csv registro/papel.csv
-<span class="k">python3 medir/nivel.py papel</span>   <span class="c"># "5 linhas válidas"</span></pre></div></div>
+<span class="k">python3 medir/nivel.py papel</span>   <span class="c"># "5 linhas válidas em registro/papel.csv"</span></pre></div></div>
   <div class="step"><div class="b">6</div><div><h3>Deixe rodar sozinho todo dia</h3><p>Liga um timer às 06:20 que mede e guarda o histórico em <code>registro/historico.jsonl</code>.</p>
 <pre><span class="k">sh systemd/instalar.sh</span>   <span class="c"># desfazer: systemctl --user disable --now nivel-ia.timer</span></pre></div></div>
-  <div class="step"><div class="b">7</div><div><h3>Uma vez por semana, decida</h3><p>Escolha UMA tarefa para subir um degrau pelo critério acima, e desça a que errou feio. Testes do kit: <code>python3 tests/run.py</code> (36 testes com registros falsos).</p></div></div>
+  <div class="step"><div class="b">7</div><div><h3>Uma vez por semana, decida</h3><p>Escolha UMA tarefa para subir um degrau pelo critério acima, e desça a que errou feio. Testes do kit: <code>python3 tests/run.py</code> (42 testes com registros falsos).</p></div></div>
 </div></section>
 
 <section id="limites"><div class="wrap">

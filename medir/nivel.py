@@ -67,13 +67,14 @@ PALAVRAS_CODIGO = set('import from def class return assert with as in is not and
 TAREFAS_PADRAO = [
     ['Traduzir conteúdo', False, ['traduz', 'translate', 'espanhol', 'inglês', 'spanish', 'english']],
     ['Produzir vídeos', False, ['vídeo', 'video', 'reel', 'short', 'avatar', 'roteiro', 'youtu', 'legenda']],
-    ['Publicar e divulgar', True, ['publica', 'telegram', 'postar', 'portal', 'instagram', 'tiktok', 'metricool']],
+    ['Clientes e dinheiro', True, ['cliente', 'customer', 'client', 'orçamento', 'cobran', 'pagar', 'pagamento', 'pago', 'dinheiro', 'money', 'payment', 'invoice', 'fatura', 'factura']],
+    ['Publicar e divulgar', True, ['publica', 'publish', 'telegram', 'postar', 'post ', 'portal', 'instagram', 'tiktok', 'metricool']],
     ['Criar cursos e aulas', False, ['curso', 'aula', 'trilha', 'módulo']],
     ['Criar guias, kits e sites', False, ['guia', 'kit', 'repo', 'projeto', 'landing', 'site', 'página']],
     ['Pesquisar e resumir', False, ['resum', 'pesquis', 'analis', 'notícia', 'artigo', 'relatório', 'classifi']],
     ['Imagens e design', False, ['imagem', 'thumb', 'capa', 'banner', 'logo', 'design']],
-    ['Manter sistemas e bots', True, ['bot', 'servidor', 'vps', 'timer', 'painel', 'erro', 'falha', 'deploy', 'backup']],
-    ['E-mail e agenda', True, ['e-mail', 'email', 'gmail', 'agenda', 'calendar', 'reunião']],
+    ['Manter sistemas e bots', True, ['bot', 'servidor', 'server', 'vps', 'timer', 'painel', 'deploy', 'backup']],
+    ['E-mail e agenda', True, ['e-mail', 'email', 'gmail', 'correo', 'agenda', 'calendar']],
 ]
 
 
@@ -320,7 +321,7 @@ def correcao(v):
     """Coluna corrigi?: n = não precisei · p = correção pequena · g = correção grande (ou não ajudou).
     Aceita sim/sí/yes/s/y como grande, e no/não/n como nenhuma."""
     t = str(v).strip().lower()
-    if t[:1] in ('p', 'm', 'l') or t.startswith('small') or t.startswith('peque'):  # pequena, menor, leve, small, pequeña
+    if t[:1] == 'p' or t.startswith('small') or t.startswith('leve') or t.startswith('minor'):  # pequena, pequeña, small, leve, minor
         return 'p'
     if t[:1] in ('g', 'b', 's', 'y'):  # grande, big, sim/sí, yes
         return 'g'
@@ -343,8 +344,14 @@ def ler_papel(arq):
     for falta in ('tarefa', 'nivel', 'minutos', 'corrigi', 'grave'):
         if falta not in cols:
             erros.append(f'coluna "{falta}" não encontrada (cabeçalho lido: {", ".join(leitor.fieldnames or [])})')
+    vazias = collections.Counter()
     for i, r in enumerate(leitor, 2):
+        if None in r or None in r.values():
+            erros.append(f'linha {i}: número de colunas diferente do cabeçalho (vírgula dentro do nome de uma coluna? use só "Conexão usada", sem parênteses)')
+            continue
         r = {chave_coluna(k): (v or '').strip() for k, v in r.items()}
+        for k in ('corrigi', 'grave'):
+            vazias[k] += not r.get(k)
         nv = r.get('nivel', '').upper().replace(' ', '')
         nv = nv if nv.startswith('AL') else 'AL' + nv
         try:
@@ -358,9 +365,12 @@ def ler_papel(arq):
         elif not r.get('tarefa'):
             erros.append(f'linha {i}: tarefa vazia')
         else:
-            linhas.append(dict(data=data_iso(r.get('data', '')), tarefa=r['tarefa'], nivel=nv, minutos=minutos, critica=sim(r.get('critica', '')),
+            linhas.append(dict(data=data_iso(r.get('data', '')), tarefa=r['tarefa'], nivel=nv, minutos=minutos, critica=(sim(r['critica']) if r.get('critica', '').strip() else None),
                                conexao=r.get('conexao', ''), corrigi=correcao(r.get('corrigi', '')) == 'g',
                                pequena=correcao(r.get('corrigi', '')) == 'p', grave=sim(r.get('grave', ''))))
+    for k in ('corrigi', 'grave'):
+        if linhas and vazias[k] >= len(linhas):
+            erros.append(f'coluna "{k}" vazia em todas as linhas: sem ela o relatório não sabe se a IA acertou')
     return linhas, erros
 
 
@@ -388,12 +398,16 @@ def montar(sessoes, papel, tarefas, dias):
         if linhas:
             nv = linhas[-1]['nivel']  # na ficha, o degrau atual é o da última vez anotada
         # crítica: pela lista de tarefas, pelas palavras (ex.: "Publicar post" cai em "Publicar e divulgar") ou marcada na ficha
-        critica = bool(regras.get(nome)) or bool(regras.get(tarefa_de(nome, tarefas))) or any(l.get('critica') for l in linhas)
+        marcada = [l['critica'] for l in linhas if l.get('critica') is not None]
+        if marcada:  # o que você marcou na ficha vale sobre as palavras
+            critica = marcada[-1]
+        else:
+            critica = bool(regras.get(nome)) or bool(regras.get(tarefa_de(nome, tarefas)))
         teto = 'AL4' if critica else 'AL5'
         prox = None if nv >= teto else NIVEIS[NIVEIS.index(nv) + 1]
         lista.append(dict(tarefa=nome, horas_semana=round(g['min'] / 60 / semanas, 1), vezes=g['n'], nivel=nv,
                           critica=critica, proximo=prox, papel=g['papel'], corrigi=g['corrigi'],
-                          decisao=decidir(prox, linhas, nv),
+                          decisao=decidir(prox, linhas, nv, critica),
                           mistura={k: round(v / sum(g['niv'].values()) * 100) for k, v in g['niv'].most_common()}))
     conex = registro_conexoes(sess, papel)
     return dict(gerado_em=datetime.now().astimezone().isoformat(timespec='seconds'), dias=dias,
@@ -412,18 +426,21 @@ CRITERIO = {'AL3': (10, 1), 'AL4': (20, 2), 'AL5': (50, 2)}
 DESCER_GRANDES = 3  # 3 correções grandes nas últimas 10 vezes = descer (1 erro grave = descer na hora)
 
 
-def decidir(proximo, linhas, atual=None):
+def decidir(proximo, linhas, atual=None, critica=False):
     """Lê a ficha da tarefa (ordem de data) e diz: descer, subir, anotar ou manter. Descer vem primeiro,
     e nunca conflita com subir: subir aceita no máximo 2 correções grandes, descer pede 3 ou um erro grave."""
     linhas = sorted(linhas, key=lambda l: l['data'])
     if atual:  # só conta o que foi feito no degrau atual: depois de subir ou descer, a conta recomeça
         linhas = [l for l in linhas if l['nivel'] == atual]
     ult10 = linhas[-10:]
+    pode_descer = atual != 'AL1'  # no AL1 não há para onde descer
+    if critica and atual == 'AL5':
+        return {'acao': 'descer', 'motivo': 'tarefa crítica para no AL4'}
     graves = [l for l in ult10 if l.get('grave')]
-    if graves:
+    if graves and pode_descer:
         return {'acao': 'descer', 'motivo': f"erro grave em {graves[-1]['data'] or 'uma das últimas vezes'}"}
     grandes = sum(l['corrigi'] for l in ult10)
-    if grandes >= DESCER_GRANDES:
+    if grandes >= DESCER_GRANDES and pode_descer:
         return {'acao': 'descer', 'motivo': f"{grandes} correções grandes nas últimas {len(ult10)} vezes"}
     if not proximo:
         return {'acao': 'manter', 'motivo': 'no teto desta tarefa'}
@@ -431,11 +448,13 @@ def decidir(proximo, linhas, atual=None):
         return {'acao': 'subir', 'motivo': 'para começar a perguntar à IA não há critério'}
     n, maxc = CRITERIO[proximo]
     if not linhas:
-        return {'acao': 'anotar', 'motivo': f"anote na ficha as próximas {n} vezes, com a coluna corrigi?"}
+        return {'acao': 'anotar', 'motivo': f"anote na ficha as próximas {n} vezes: anote mais {n}"}
     janela = linhas[-n:]
     erros = sum(l['corrigi'] for l in janela)
     if len(janela) < n:
-        return {'acao': 'anotar', 'motivo': f"{len(janela)} de {n} vezes anotadas"}
+        return {'acao': 'anotar', 'motivo': f"{len(janela)} de {n} vezes anotadas: anote mais {n - len(janela)}"}
+    if any(l.get('grave') for l in janela):
+        return {'acao': 'manter', 'motivo': f"houve erro grave nas últimas {n} vezes"}
     if erros <= maxc:
         return {'acao': 'subir', 'motivo': f"{n} vezes anotadas, {erros} com correção grande (limite {maxc})"}
     return {'acao': 'manter', 'motivo': f"{erros} correções grandes nas últimas {n} vezes (limite {maxc})"}
@@ -538,9 +557,12 @@ def cmd_varrer(a):
 
 def carregar(a):
     arq = a.registro / 'sessoes.json'
-    if not arq.exists():
-        sys.exit('Ainda não há medição: rode primeiro  python3 medir/nivel.py varrer')
-    d = json.loads(arq.read_text(encoding='utf-8'))
+    if arq.exists():
+        d = json.loads(arq.read_text(encoding='utf-8'))
+    elif (a.registro / 'papel.csv').exists():  # só a ficha (ChatGPT no navegador etc.): relatório sem logs
+        d = {'sessoes': [], 'dias': 30}
+    else:
+        sys.exit('Ainda não há medição: rode  python3 medir/nivel.py varrer  ou crie registro/papel.csv a partir de kit/papel-modelo.csv')
     papel, erros = ler_papel(a.registro / 'papel.csv')
     for e in erros:
         print('Aviso na ficha de papel,', e, file=sys.stderr)
