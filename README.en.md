@@ -37,7 +37,8 @@ Who does what: 🧠 you · ⚙️ script or timer
 5. ⚙️ **Report:** `python3 medir/nivel.py relatorio` builds the ladder, tasks, next rung for each task, connections, and “who can move up now” in `registro/relatorio.md` (and includes the paper form if one exists).
 6. ⚙️ **All connections:** `python3 medir/nivel.py conexoes` lists each program, site, service, agent, and skill, with the first and last time it was used.
 7. ⚙️ **Run automatically every day:** `sh systemd/instalar.sh` enables a timer at 06:20 that repeats steps 4 and 5 and saves the history in `registro/historico.jsonl`.
-8. 🧠 **Once a week:** read the report, choose ONE task to move up a rung (criteria in ESCADA.md) and move down a task that went badly.
+8. ⚙️ **Certificate:** `python3 medir/certificado.py --nome "Your Name"` generates `registro/certificado-AAAA-MM-DD.html`: rung, AL1–AL5 ladder, tasks, week-by-week progress, and projection (1, 3, and 6 months). Open it in a browser and use the button to save it as a PDF. Longer period: `nivel.py --registro /tmp/n90 varrer --dias 90`, `nivel.py --registro /tmp/n90 relatorio`, and `certificado.py --nome "Your Name" --registro /tmp/n90`.
+9. 🧠 **Once a week:** read the report, choose ONE task to move up a rung (criteria in ESCADA.md) and move down a task that went badly.
 
 ## Requirements
 
@@ -57,7 +58,7 @@ Terminal, Python 3.9 or newer (standard library only, nothing to install), and g
 
 ## Tests
 
-`python3 tests/run.py` (42 tests with fake logs; nothing from your machine).
+`python3 tests/run.py` (45 tests with fake logs; nothing from your machine).
 
 ## Privacy
 

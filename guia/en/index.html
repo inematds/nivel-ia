@@ -181,6 +181,7 @@
     <a class="sec" href="#subir">How to climb</a>
     <a class="sec" href="#medir">How to measure</a>
     <a class="sec" href="#caso">Real case</a>
+    <a class="sec" href="#certificado">Certificate</a>
     <a class="sec" href="#tecnico">Kit (technical)</a>
     <span class="lang"><a href="../">PT</a><a class="on" href="./">EN</a><a href="../es/">ES</a></span>
     <button class="tgl" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">🌙</button>
@@ -306,6 +307,15 @@
   <div class="card" style="margin-top:22px"><h3>🔗 8,039 connections recorded in 30 days</h3>
     <p>7,696 programs and scripts, 292 websites, 23 ready-made recipes (skills), 19 external services, 7 types of AI helper (agents), and 2 types of web search. Some of the most used: Codex image generation (5,231 sessions, all on their own), git, which stores file versions (774), ffmpeg, which assembles video (753), Metricool, which schedules social media posts (299 sessions, 271 on their own), and YouTube publishing (197). This doesn’t include background commands (listing, copying, and moving files) or the folders and files it opened or changed: those appear only on the sheet. This is the list of doors the AI can access: each one is something you chose to open, and the kit shows when it was first and last used.</p></div>
 </div></section>
+<section id="certificado"><div class="wrap">
+  <span class="chip">Certificate</span>
+  <h2>Show which rung you are on and how far you have climbed</h2>
+  <p class="sub">The kit turns your measurements into a one-page certificate: the % of work conducted by AI, the AL1 to AL5 ladder, the main tasks with the next rung, your week-by-week progress, and the projection for 1, 3, and 6 months. You choose the period (30, 90 days, or more). It is an HTML page: open it in any browser and turn it into a PDF with the “Save as PDF” button, without image software.</p>
+  <figure style="margin:18px 0 0;border-radius:14px;overflow:hidden;border:1px solid var(--line)"><img src="../assets/certificado-exemplo.jpg" alt="Certificate example: 48.9% of work conducted by AI in 90 days, progress from 11% to 61%, and projection" loading="lazy" style="width:100%;display:block"></figure>
+  <div class="box"><p><b>What it proves, and what it does not:</b> it is a measurement recorded from your own machine’s records, not an official assessment. It lets you show your current standing and track progress from one measurement to the next. In the example, Nei over 90 days: he went from 11% to 61% of work conducted by AI.</p></div>
+  <p class="mut">How to generate it: see step 7 in the usage guide below.</p>
+</div></section>
+
 <div id="tecnico" class="techhead"><div class="wrap">
   <span class="chip">Technical section</span>
   <h2>The kit: for those who want to measure on their own computer</h2>
@@ -362,7 +372,13 @@
 <span class="k">python3 medir/nivel.py papel</span>   <span class="c"># "5 linhas válidas em registro/papel.csv"</span></pre></div></div>
   <div class="step"><div class="b">6</div><div><h3>Run automatically every day</h3><p>Turns on a timer at 06:20 that measures and saves the history in <code>registro/historico.jsonl</code>.</p>
 <pre><span class="k">sh systemd/instalar.sh</span>   <span class="c"># undo: systemctl --user disable --now nivel-ia.timer</span></pre></div></div>
-  <div class="step"><div class="b">7</div><div><h3>Decide once a week</h3><p>Choose ONE task to move up a rung using the criterion above, and move down the one with a serious mistake. Kit tests: <code>python3 tests/run.py</code> (42 tests with fake records).</p></div></div>
+  <div class="step"><div class="b">7</div><div><h3>Generate your certificate</h3><p>A page with your rung, week-by-week progress, and projection. Open the file in a browser and use “Save as PDF”. For a longer period (e.g., 90 days), measure in a separate folder without changing the daily record.</p>
+<pre><span class="k">python3</span> medir/certificado.py --nome <span class="s">"Your Name"</span>   <span class="c"># saves registro/certificado-AAAA-MM-DD.html</span>
+<span class="c"># 90 days:</span>
+<span class="k">python3</span> medir/nivel.py --registro /tmp/n90 varrer --dias 90
+<span class="k">python3</span> medir/nivel.py --registro /tmp/n90 relatorio
+<span class="k">python3</span> medir/certificado.py --nome <span class="s">"Your Name"</span> --registro /tmp/n90</pre></div></div>
+  <div class="step"><div class="b">8</div><div><h3>Decide once a week</h3><p>Choose ONE task to move up a rung using the criterion above, and move down the one with a serious mistake. Kit tests: <code>python3 tests/run.py</code> (45 tests with fake records).</p></div></div>
 </div></section>
 
 <section id="limites"><div class="wrap">

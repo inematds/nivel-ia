@@ -37,7 +37,8 @@ Quem faz: 🧠 você · ⚙️ script ou timer
 5. ⚙️ **Relatório:** `python3 medir/nivel.py relatorio` monta a escada, as tarefas, o próximo degrau de cada uma, as conexões e "quem pode subir agora" em `registro/relatorio.md` (junta a ficha de papel se existir).
 6. ⚙️ **Todas as conexões:** `python3 medir/nivel.py conexoes` lista cada programa, site, serviço, agente e skill, com a primeira e a última vez.
 7. ⚙️ **Todo dia sozinho:** `sh systemd/instalar.sh` liga um timer às 06:20 que repete os passos 4 e 5 e guarda o histórico em `registro/historico.jsonl`.
-8. 🧠 **Uma vez por semana:** leia o relatório, escolha UMA tarefa para subir um degrau (critérios em ESCADA.md) e desça a que errou feio.
+8. ⚙️ **Certificado:** `python3 medir/certificado.py --nome "Seu Nome"` gera `registro/certificado-AAAA-MM-DD.html`: degrau, escada AL1–AL5, tarefas, evolução semana a semana e projeção (1, 3 e 6 meses). Abre no navegador e vira PDF no botão. Período maior: `nivel.py --registro /tmp/n90 varrer --dias 90`, `nivel.py --registro /tmp/n90 relatorio` e `certificado.py --nome "Seu Nome" --registro /tmp/n90`.
+9. 🧠 **Uma vez por semana:** leia o relatório, escolha UMA tarefa para subir um degrau (critérios em ESCADA.md) e desça a que errou feio.
 
 ## Requisitos
 
@@ -57,7 +58,7 @@ Terminal, Python 3.9 ou mais novo (só biblioteca padrão, sem instalar nada) e 
 
 ## Testes
 
-`python3 tests/run.py` (42 testes com logs falsos, nada da sua máquina).
+`python3 tests/run.py` (45 testes com logs falsos, nada da sua máquina).
 
 ## Privacidade
 

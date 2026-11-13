@@ -37,7 +37,8 @@ Quién lo hace: 🧠 tú · ⚙️ script o temporizador
 5. ⚙️ **Informe:** `python3 medir/nivel.py relatorio` genera la escalera, las tareas, el próximo peldaño de cada una, las conexiones y «quién puede subir ahora» en `registro/relatorio.md` (combina la ficha en papel si existe).
 6. ⚙️ **Todas las conexiones:** `python3 medir/nivel.py conexoes` enumera cada programa, sitio, servicio, agente y skill, con la primera y la última vez que se usaron.
 7. ⚙️ **Todos los días, automáticamente:** `sh systemd/instalar.sh` activa un temporizador a las 06:20 que repite los pasos 4 y 5 y guarda el historial en `registro/historico.jsonl`.
-8. 🧠 **Una vez por semana:** lee el informe, elige UNA tarea para subir un peldaño (criterios en ESCADA.md) y baja la que tuvo un error grave.
+8. ⚙️ **Certificado:** `python3 medir/certificado.py --nome "Tu Nombre"` genera `registro/certificado-AAAA-MM-DD.html`: escalón, escalera AL1–AL5, tareas, evolución semana a semana y proyección (1, 3 y 6 meses). Ábrelo en el navegador y usa el botón para guardarlo como PDF. Período más largo: `nivel.py --registro /tmp/n90 varrer --dias 90`, `nivel.py --registro /tmp/n90 relatorio` y `certificado.py --nome "Tu Nombre" --registro /tmp/n90`.
+9. 🧠 **Una vez por semana:** lee el informe, elige UNA tarea para subir un peldaño (criterios en ESCADA.md) y baja la que tuvo un error grave.
 
 ## Requisitos
 
@@ -57,7 +58,7 @@ Terminal, Python 3.9 o posterior (solo biblioteca estándar, sin instalar nada) 
 
 ## Pruebas
 
-`python3 tests/run.py` (42 pruebas con registros falsos, nada de tu computadora).
+`python3 tests/run.py` (45 pruebas con registros falsos, nada de tu computadora).
 
 ## Privacidad
 

@@ -384,6 +384,41 @@ def t_palavra_no_comeco():
     assert N.tarefa_de('cobrança do cliente', N.TAREFAS_PADRAO) == 'Clientes e dinheiro'
 
 
+
+@caso
+def t_certificado_curva_e_projecao():
+    import datetime as dt
+    import subprocess
+    with tempfile.TemporaryDirectory() as d:
+        rel = {'gerado_em': '2026-11-13T04:00:00-03:00', 'dias': 90, 'parte_ia': 40.0,
+               'escada': {'AL1': 0.0, 'AL2': 20.0, 'AL3': 40.0, 'AL4': 25.0, 'AL5': 15.0}, 'tem_papel': False,
+               'fontes': {'conversas': 10, 'sozinhas': 5, 'acoes': 100},
+               'tarefas': [{'tarefa': 'Outras tarefas', 'horas_semana': 99, 'nivel': 'AL2', 'proximo': 'AL3'},
+                           {'tarefa': 'Produzir vídeos', 'horas_semana': 9, 'nivel': 'AL3', 'proximo': 'AL4'}]}
+        Path(d, 'relatorio.json').write_text(json.dumps(rel))
+        ss = []
+        seg0 = dt.datetime(2026, 8, 24, 12)
+        # semana 0 quase sem uso (registro incompleto) e depois 8 semanas subindo de 10% a 70% de AL4+AL5
+        ss.append({'inicio': seg0.timestamp(), 'minutos': 600, 'nivel': 'AL5'})
+        for w in range(1, 9):
+            ini = (seg0 + dt.timedelta(weeks=w)).timestamp()
+            ia = 10 + w * 7.5
+            ss.append({'inicio': ini, 'minutos': 60 * ia, 'nivel': 'AL4'})
+            ss.append({'inicio': ini, 'minutos': 60 * (100 - ia), 'nivel': 'AL3'})
+        Path(d, 'sessoes.json').write_text(json.dumps({'sessoes': ss}))
+        out = Path(d, 'c.html')
+        r = subprocess.run([sys.executable, str(RAIZ / 'medir' / 'certificado.py'), '--nome', 'Ana <Teste>', '--registro', d, '--saida', str(out)],
+                           capture_output=True, text=True)
+        assert r.returncode == 0, r.stderr
+        h = out.read_text()
+        assert 'Ana &lt;Teste&gt;' in h                      # nome escapado
+        assert all(f'<li><b>AL{i}</b>' in h for i in range(1, 6))  # escada uma por linha
+        assert 'Outras tarefas' not in h and 'Produzir vídeos' in h
+        assert 'semana de 31/08' in h and 'na semana de 24/08' not in h  # semana quase vazia do começo sai
+        assert 'em 3 meses' in h and 'projeção, não profecia' in h
+        assert '<svg' in h and 'nos últimos <b>90 dias</b>' in h
+
+
 def main():
     falhas = 0
     for f in OK:
