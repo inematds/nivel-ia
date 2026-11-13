@@ -10,7 +10,7 @@ A escada (o nível vem do que ficou registrado no log, não de opinião):
   AL2  a IA ajuda: você pergunta, ela responde .. conversa com menos de 5 ações da IA por mensagem sua
   AL3  a IA colabora, passo a passo com você .... 5 a 14 ações por mensagem sua
   AL4  a IA conduz e você só revisa ............. 15 ou mais ações por mensagem sua, ou pedido seu feito pelo bot (Telegram)
-  AL5  a IA roda sozinha ......................... sessão aberta por script, bot ou timer (claude -p, codex exec), sem conversa
+  AL5  a IA roda sozinha ......................... sessão aberta por script, bot ou timer (claude -p, codex exec) com até 2 mensagens
 
 Uso:
   nivel.py varrer    [--dias 30]          lê os logs e grava registro/sessoes.json
@@ -38,6 +38,7 @@ REGISTRO = RAIZ / 'registro'
 PAUSA = 10 * 60          # intervalo maior que 10 min entre duas mensagens não conta como tempo ativo
 LIMITE_AL4 = 15          # ações da IA por mensagem sua
 LIMITE_AL3 = 5
+CONVERSA_MIN = 3        # mensagens humanas a partir das quais uma sessão por SDK conta como conversa
 NOMES = {'AL1': 'Você faz sozinho', 'AL2': 'A IA ajuda', 'AL3': 'A IA colabora',
          'AL4': 'A IA conduz, você revisa', 'AL5': 'A IA roda sozinha'}
 NIVEIS = list(NOMES)
@@ -67,7 +68,7 @@ PALAVRAS_CODIGO = set('import from def class return assert with as in is not and
 TAREFAS_PADRAO = [
     ['Traduzir conteúdo', False, ['traduz', 'translate', 'espanhol', 'inglês', 'spanish', 'english']],
     ['Produzir vídeos', False, ['vídeo', 'video', 'reel', 'short', 'avatar', 'roteiro', 'youtu', 'legenda']],
-    ['Clientes e dinheiro', True, ['cliente', 'customer', 'client', 'orçamento', 'cobran', 'pagar', 'pagamento', 'pago', 'dinheiro', 'money', 'payment', 'invoice', 'fatura', 'factura']],
+    ['Clientes e dinheiro', True, ['cliente', 'customer', 'orçamento', 'cobran', 'pagar', 'pagamento', 'pago', 'dinheiro', 'money', 'payment', 'invoice', 'fatura', 'factura']],
     ['Publicar e divulgar', True, ['publica', 'publish', 'telegram', 'postar', 'post ', 'portal', 'instagram', 'tiktok', 'metricool']],
     ['Criar cursos e aulas', False, ['curso', 'aula', 'trilha', 'módulo']],
     ['Criar guias, kits e sites', False, ['guia', 'kit', 'repo', 'projeto', 'landing', 'site', 'página']],
@@ -132,7 +133,8 @@ def fecha(s):
     s['minutos'] = round(ativo(s.pop('tempos')), 1)
     # AL5 = ninguém conversando: aberta por script, bot ou timer (claude -p / codex exec) ou sem nenhuma mensagem sua.
     # Uma pergunta solta no terminal NÃO é AL5: vai pela conta de ações por mensagem (AL2 a AL4).
-    s['automatica'] = bool(s.get('automatica')) or s['humanos'] == 0
+    # Aberta por SDK/exec mas com 3+ mensagens humanas = alguém conversando (app, bot interativo): não é AL5.
+    s['automatica'] = (bool(s.get('automatica')) and s['humanos'] < CONVERSA_MIN) or s['humanos'] == 0
     s['primeiro'] = limpa(s['primeiro'])
     s['conexoes'] = dict(s['conexoes'])
     s['nivel'] = nivel(s)
@@ -274,7 +276,7 @@ def carregar_tarefas():
 def tarefa_de(texto, tarefas):
     t = texto.lower()
     for nome, _critica, palavras in tarefas:
-        if any(p in t for p in palavras):
+        if any(re.search(r'(?<!\w)' + re.escape(p), t) for p in palavras):  # palavra começa ali: 'apagou' não é 'pago'
             return nome
     return 'Outras tarefas'
 

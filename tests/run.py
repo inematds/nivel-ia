@@ -369,6 +369,21 @@ def t_registro_fora_do_git():
     assert 'registro/*' in gi and '!registro/.gitkeep' in gi
 
 
+@caso
+def t_sdk_com_conversa_nao_e_al5():
+    with tempfile.TemporaryDirectory() as d:
+        so = N.ler_claude(str(claude_log(d, 'a', 1, 30, entrada='sdk-cli')))
+        conversa = N.ler_claude(str(claude_log(d, 'b', 5, 100, entrada='sdk-cli')))
+    assert so['nivel'] == 'AL5' and conversa['nivel'] == 'AL4' and not conversa['automatica']
+
+
+@caso
+def t_palavra_no_comeco():
+    assert N.tarefa_de('apagou o arquivo velho', N.TAREFAS_PADRAO) != 'Clientes e dinheiro'
+    assert N.tarefa_de('MCP client do navegador', N.TAREFAS_PADRAO) != 'Clientes e dinheiro'
+    assert N.tarefa_de('cobrança do cliente', N.TAREFAS_PADRAO) == 'Clientes e dinheiro'
+
+
 def main():
     falhas = 0
     for f in OK:

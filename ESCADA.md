@@ -62,7 +62,7 @@ Uma tarefa por vez, **um degrau por vez**. **Quem decide é você.** O relatóri
 | Pergunta | Onde ver |
 |---|---|
 | Em que degrau está cada tarefa? | `relatorio.md` → "Suas tarefas" (ou a coluna nível da ficha) |
-| O que já roda sozinho e eu nem lembrava? | AL5 no relatório: sessões sem conversa |
+| O que já roda sozinho e eu nem lembrava? | AL5 no relatório: sessões abertas por script, bot ou horário, com até 2 mensagens |
 | Quais portas eu abri para a IA? | "Conexões registradas": programa, site, serviço, agente, skill e o que você anotou na ficha, com a primeira e a última vez (pastas e arquivos só na ficha) |
 | Quem pode subir ou descer agora? | "Pode subir" e "Descer um degrau" no relatório, conferidos pelas colunas "corrigi?" e "erro grave?" da ficha |
 | A IA acertou? | Só a ficha diz: colunas "corrigi?" e "erro grave?". O medidor mede liberdade, não acerto. |
