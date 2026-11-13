@@ -46,7 +46,7 @@ Uma página com o % do seu trabalho conduzido pela IA, a escada AL1–AL5, as ta
 
 **Jeito mais fácil (forma B): peça à sua IA.** Abra o Claude Code ou o Codex e cole (troque o nome). Dados confidenciais? Use o jeito do terminal, logo abaixo (veja Privacidade).
 
-> Baixe o kit https://github.com/inematds/nivel-ia numa pasta nivel-ia (se já existir, use ela), meça os meus últimos 30 dias com `python3 medir/nivel.py varrer --dias 30` e `python3 medir/nivel.py relatorio`, gere o meu certificado com `python3 medir/certificado.py --nome "Seu Nome"` e abra o certificado no navegador. No fim, me diga onde ficaram o certificado e o relatório e resuma em 3 linhas o que deu. Não envie os meus dados para nenhum outro serviço nem site.
+> Baixe o kit https://github.com/inematds/nivel-ia numa pasta nivel-ia (se já existir, use ela), meça os meus últimos 30 dias com `python3 medir/nivel.py varrer --dias 30` e `python3 medir/nivel.py relatorio`, gere o meu certificado com `python3 medir/certificado.py --nome "Seu Nome"` e abra o certificado no navegador. No fim, me diga onde ficaram o certificado e o relatório e resuma em 3 linhas o que deu. Não abra o arquivo registro/sessoes.json e não envie os meus dados para nenhum outro serviço nem site.
 
 **Você mesmo, comando por comando** (Linux ou Mac; no Windows, WSL; Python 3.9+; ter usado o Claude Code ou o Codex nesta máquina):
 
@@ -91,7 +91,7 @@ Terminal, Python 3.9 ou mais novo (só biblioteca padrão, sem instalar nada) e 
 
 ## Privacidade
 
-**Duas formas de rodar.** O medidor é Python puro e roda só na sua máquina, sem internet. **A. Pelo terminal**: você roda os comandos e abre o certificado; nada sai do computador. **B. Pedindo à sua IA**: o Claude Code ou o Codex roda os comandos e lê o relatório para resumir, e essa leitura passa pelo servidor do provedor (Anthropic ou OpenAI), como qualquer sessão. O relatório traz os nomes das tarefas e as conexões (programas, agentes, skills e sites). **Dados confidenciais (trabalho de cliente, sigilo): use a forma A.**
+**Duas formas de rodar.** O medidor é Python puro e roda só na sua máquina, sem internet. **A. Pelo terminal**: você roda os comandos e abre o certificado; nada sai do computador. **B. Pedindo à sua IA**: o Claude Code ou o Codex roda os comandos e lê o relatório para resumir, e essa leitura passa pelo servidor do provedor (Anthropic ou OpenAI), como qualquer sessão. O relatório traz os nomes das tarefas e as conexões (programas, agentes, skills e sites). Esses nomes podem revelar o nome de um cliente ou de um projeto. **Dados confidenciais (trabalho de cliente, sigilo): use a forma A.**
 
 `registro/` fica fora do git. O primeiro pedido de cada sessão é guardado curto e com chaves, e-mails e números longos trocados por `[oculto]`.
 

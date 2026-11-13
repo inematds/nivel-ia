@@ -32,7 +32,7 @@ Quién lo hace: 🧠 tú · ⚙️ script o temporizador
 
 1. 🧠 **Lee la escalera** y elige 3 tareas que haces todas las semanas: [ESCADA.md (en portugués)](ESCADA.md).
 2. 🧠 **En papel:** imprime la ficha (https://inematds.github.io/nivel-ia/kit/ficha-papel.es.html) y anota una línea por tarea (fecha, tarea, ¿crítica? s/n, peldaño 1 a 5, minutos, conexión usada, ¿corregí? n/p/g, ¿error grave? s/n). Sirve para cualquier IA y para lo que haces sin IA (AL1).
-3. 🧠 **Digitaliza la ficha** (opcional): copia `kit/papel-modelo.csv` en `registro/papel.csv`, ábrelo en una hoja de cálculo, escribe las líneas y guárdalo como CSV. Compruébalo con `python3 medir/nivel.py papel`. Si solo usas la ficha, puedes omitir los pasos 4 y 6: el informe del programa sale en portugués.
+3. 🧠 **Digitaliza la ficha** (opcional): copia `kit/papel-modelo.csv` en `registro/papel.csv`, ábrelo en una hoja de cálculo, escribe las líneas y guárdalo como CSV. Compruébalo con `python3 medir/nivel.py papel`. Si solo usas la ficha, puedes omitir los pasos 4 y 6: el informe sale solo con ella.
 4. ⚙️ **Automático:** `python3 medir/nivel.py varrer --dias 30` lee los registros de Claude Code y Codex de esta computadora y los guarda en `registro/sessoes.json`.
 5. ⚙️ **Informe:** `python3 medir/nivel.py relatorio --lang es` genera la escalera, las tareas, el próximo peldaño de cada una, las conexiones y «quién puede subir ahora» en `registro/relatorio.md` (combina la ficha en papel si existe).
 6. ⚙️ **Todas las conexiones:** `python3 medir/nivel.py conexoes` enumera cada programa, sitio, servicio, agente y skill, con la primera y la última vez que se usaron.
@@ -46,7 +46,7 @@ Una página con el % de tu trabajo realizado por la IA, la escala AL1–AL5, las
 
 **La forma más fácil (forma B): pídeselo a tu IA.** Abre Claude Code o Codex y pega esto (cambia el nombre). ¿Datos confidenciales? Usa el método de la terminal, justo abajo (consulta Privacidad).
 
-> Descarga el kit https://github.com/inematds/nivel-ia en una carpeta nivel-ia (si ya existe, úsala), mide mis últimos 30 días con `python3 medir/nivel.py varrer --dias 30` y `python3 medir/nivel.py relatorio --lang es`, genera mi certificado con `python3 medir/certificado.py --nome "Tu Nombre" --lang es` y abre el certificado en el navegador. Al final, dime dónde quedaron el certificado y el informe y resume en 3 líneas qué resultado dio. No envíes mis datos a ningún otro servicio ni sitio.
+> Descarga el kit https://github.com/inematds/nivel-ia en una carpeta nivel-ia (si ya existe, úsala), mide mis últimos 30 días con `python3 medir/nivel.py varrer --dias 30` y `python3 medir/nivel.py relatorio --lang es`, genera mi certificado con `python3 medir/certificado.py --nome "Tu Nombre" --lang es` y abre el certificado en el navegador. Al final, dime dónde quedaron el certificado y el informe y resume en 3 líneas qué resultado dio. No abras el archivo registro/sessoes.json ni envíes mis datos a ningún otro servicio ni sitio.
 
 **Hazlo tú, comando por comando** (Linux o Mac; en Windows, WSL; Python 3.9+; haber usado Claude Code o Codex en esta máquina):
 
@@ -58,7 +58,7 @@ python3 medir/certificado.py --nome "Tu Nombre" --lang es   # 3. genera el certi
 xdg-open registro/certificado-*.html             # 4. abre (en Mac: open) → botón "Guardar em PDF"
 ```
 
-Período más largo (p. ej., 90 días), sin modificar el registro diario: `python3 medir/nivel.py --registro /tmp/n90 varrer --dias 90`, `python3 medir/nivel.py --registro /tmp/n90 relatorio` y `python3 medir/certificado.py --nome "Tu Nombre" --registro /tmp/n90`. Claude Code borra los registros de más de 30 días, a menos que aumentes `cleanupPeriodDays`; lo que ya se borró no se puede recuperar. Si los registros cubren menos días de los solicitados, el medidor lo avisa en la terminal, en el informe y en el certificado.
+Período más largo (p. ej., 90 días), sin modificar el registro diario: `python3 medir/nivel.py --registro /tmp/n90 varrer --dias 90`, `python3 medir/nivel.py --registro /tmp/n90 relatorio --lang es` y `python3 medir/certificado.py --nome "Tu Nombre" --registro /tmp/n90`. Claude Code borra los registros de más de 30 días, a menos que aumentes `cleanupPeriodDays`; lo que ya se borró no se puede recuperar. Si los registros cubren menos días de los solicitados, el medidor lo avisa en la terminal, en el informe y en el certificado.
 
 **Dónde quedan los archivos**
 
@@ -91,7 +91,7 @@ Terminal, Python 3.9 o posterior (solo biblioteca estándar, sin instalar nada) 
 
 ## Privacidad
 
-**Dos formas de ejecutarlo.** El medidor es Python puro y se ejecuta solo en tu máquina, sin internet. **A. Desde la terminal**: ejecutas los comandos y abres el certificado; nada sale de la computadora. **B. Pidiéndoselo a tu IA**: Claude Code o Codex ejecuta los comandos y lee el informe para resumírtelo, y esa lectura pasa por el servidor del proveedor (Anthropic u OpenAI), como cualquier sesión. El informe incluye los nombres de las tareas y las conexiones (programas, agentes, skills y sitios). **Datos confidenciales (trabajo de clientes, confidencialidad): usa la forma A.**
+**Dos formas de ejecutarlo.** El medidor es Python puro y se ejecuta solo en tu máquina, sin internet. **A. Desde la terminal**: ejecutas los comandos y abres el certificado; nada sale de la computadora. **B. Pidiéndoselo a tu IA**: Claude Code o Codex ejecuta los comandos y lee el informe para resumírtelo, y esa lectura pasa por el servidor del proveedor (Anthropic u OpenAI), como cualquier sesión. El informe incluye los nombres de las tareas y las conexiones (programas, agentes, skills y sitios). Estos nombres pueden revelar el nombre de un cliente o de un proyecto. **Datos confidenciales (trabajo de clientes, confidencialidad): usa la forma A.**
 
 `registro/` queda fuera de git. Se guarda una versión breve del primer pedido de cada sesión, con las claves, los correos electrónicos y los números largos reemplazados por `[oculto]`.
 
