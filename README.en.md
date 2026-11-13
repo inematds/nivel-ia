@@ -34,10 +34,10 @@ Who does what: 🧠 you · ⚙️ script or timer
 2. 🧠 **On paper:** print the form (https://inematds.github.io/nivel-ia/kit/ficha-papel.en.html) and write one line per task (date, task, critical? y/n, rung 1 to 5, minutes, connection used, fixed? n/p/g, serious error? y/n). It works with any AI and for work you do without AI (AL1).
 3. 🧠 **Enter the form data** (optional): copy `kit/papel-modelo.csv` to `registro/papel.csv`, open it in a spreadsheet, enter the rows, and save as CSV. Dates on the form must use yyyy-mm-dd (mm/dd/yyyy is read incorrectly). Check it with `python3 medir/nivel.py papel`. If you only use the form, you can skip steps 4 and 6: the report will use only the form data. The program’s report is in Portuguese.
 4. ⚙️ **Automatic:** `python3 medir/nivel.py varrer --dias 30` reads Claude Code and Codex logs from this machine and writes `registro/sessoes.json`.
-5. ⚙️ **Report:** `python3 medir/nivel.py relatorio` builds the ladder, tasks, next rung for each task, connections, and “who can move up now” in `registro/relatorio.md` (and includes the paper form if one exists).
+5. ⚙️ **Report:** `python3 medir/nivel.py relatorio --lang en` builds the ladder, tasks, next rung for each task, connections, and “who can move up now” in `registro/relatorio.md` (and includes the paper form if one exists).
 6. ⚙️ **All connections:** `python3 medir/nivel.py conexoes` lists each program, site, service, agent, and skill, with the first and last time it was used.
 7. ⚙️ **Run automatically every day:** `sh systemd/instalar.sh` enables a timer at 06:20 that repeats steps 4 and 5 and saves the history in `registro/historico.jsonl`.
-8. ⚙️ **Certificate:** `python3 medir/certificado.py --nome "Your Name"` generates `registro/certificado-AAAA-MM-DD.html`: rung, AL1–AL5 ladder, tasks, week-by-week progress, and projection (1, 3, and 6 months). Open it in a browser and use the button to save it as a PDF. Longer period: `nivel.py --registro /tmp/n90 varrer --dias 90`, `nivel.py --registro /tmp/n90 relatorio`, and `certificado.py --nome "Your Name" --registro /tmp/n90`.
+8. ⚙️ **Certificate:** `python3 medir/certificado.py --nome "Your Name" --lang en` generates `registro/certificado-AAAA-MM-DD-en.html`: rung, AL1–AL5 ladder, tasks, week-by-week progress, and projection (1, 3, and 6 months). Open it in a browser and use the button to save it as a PDF. Longer period: `nivel.py --registro /tmp/n90 varrer --dias 90`, `nivel.py --registro /tmp/n90 relatorio --lang en`, and `certificado.py --nome "Your Name" --lang en --registro /tmp/n90`.
 9. 🧠 **Once a week:** read the report, choose ONE task to move up a rung (criteria in ESCADA.md) and move down a task that went badly.
 
 ## 🎓 Certificate: step by step
@@ -46,25 +46,25 @@ A page showing the percentage of your work handled by AI, the AL1–AL5 ladder, 
 
 **The easiest way: ask your AI.** Open Claude Code or Codex and paste this (replace the name):
 
-> Download the kit from https://github.com/inematds/nivel-ia into a folder named nivel-ia (use it if it already exists), measure my last 30 days with `python3 medir/nivel.py varrer --dias 30` and `python3 medir/nivel.py relatorio`, generate my certificate with `python3 medir/certificado.py --nome "Your Name"`, and open the certificate in the browser. At the end, tell me where the certificate and report were saved and summarize the results in 3 lines. Don't send anything to the internet: everything stays local.
+> Download the kit from https://github.com/inematds/nivel-ia into a folder named nivel-ia (use it if it already exists), measure my last 30 days with `python3 medir/nivel.py varrer --dias 30` and `python3 medir/nivel.py relatorio --lang en`, generate my certificate with `python3 medir/certificado.py --nome "Your Name" --lang en`, and open the certificate in the browser. At the end, tell me where the certificate and report were saved and summarize the results in 3 lines. Don't send anything to the internet: everything stays local.
 
 **Do it yourself, one command at a time** (Linux or Mac; on Windows, WSL; Python 3.9+; must have used Claude Code or Codex on this machine):
 
 ```bash
 git clone https://github.com/inematds/nivel-ia && cd nivel-ia
 python3 medir/nivel.py varrer --dias 30          # 1. measures the last 30 days (nothing leaves the machine)
-python3 medir/nivel.py relatorio                 # 2. builds the report
-python3 medir/certificado.py --nome "Your Name"   # 3. generates the certificate
+python3 medir/nivel.py relatorio --lang en                 # 2. builds the report
+python3 medir/certificado.py --nome "Your Name" --lang en   # 3. generates the certificate
 xdg-open registro/certificado-*.html             # 4. opens it (on Mac: open) → "Save as PDF" button
 ```
 
-Longer period (e.g., 90 days), without changing the daily log: `python3 medir/nivel.py --registro /tmp/n90 varrer --dias 90`, `python3 medir/nivel.py --registro /tmp/n90 relatorio`, and `python3 medir/certificado.py --nome "Your Name" --registro /tmp/n90` (Claude Code deletes logs older than 30 days unless you increase `cleanupPeriodDays`).
+Longer period (e.g., 90 days), without changing the daily log: `python3 medir/nivel.py --registro /tmp/n90 varrer --dias 90`, `python3 medir/nivel.py --registro /tmp/n90 relatorio --lang en`, and `python3 medir/certificado.py --nome "Your Name" --lang en --registro /tmp/n90` (Claude Code deletes logs older than 30 days unless you increase `cleanupPeriodDays`).
 
 **Where the files are saved**
 
 | File | What it is |
 |---|---|
-| `registro/certificado-AAAA-MM-DD.html` | The certificate (open in your browser → "Save as PDF") |
+| `registro/certificado-AAAA-MM-DD-en.html` | The certificate (open in your browser → "Save as PDF") |
 | `registro/relatorio.md` | The full report: ladder, tasks, next step, who can advance, connections |
 | `registro/relatorio.json` | The same numbers as data (the certificate reads them from here) |
 | `registro/sessoes.json` | The session-by-session measurement (only on your machine, outside git) |
@@ -87,7 +87,7 @@ Terminal, Python 3.9 or newer (standard library only, nothing to install), and g
 
 ## Tests
 
-`python3 tests/run.py` (45 tests with fake logs; nothing from your machine).
+`python3 tests/run.py` (46 tests with fake logs; nothing from your machine).
 
 ## Privacy
 

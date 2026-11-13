@@ -419,6 +419,36 @@ def t_certificado_curva_e_projecao():
         assert '<svg' in h and 'nos últimos <b>90 dias</b>' in h
 
 
+
+@caso
+def t_idiomas_relatorio_e_certificado():
+    import subprocess
+    pt = N.idioma('pt')
+    for lang in ('en', 'es'):
+        d = N.idioma(lang)
+        assert set(d) == set(pt) and all(set(d[k]) == set(pt[k]) for k in pt if isinstance(pt[k], dict)), lang
+    dec = N.decidir('AL4', [{'data': '2026-11-01', 'nivel': 'AL3', 'corrigi': 0, 'grave': False}] * 3, atual='AL3')
+    assert dec['acao'] == 'anotar' and dec['chave'] == 'anotadas_falta' and '3 de 20' in dec['motivo']
+    r = {'gerado_em': '2026-11-13T04:00:00-03:00', 'dias': 30, 'parte_ia': 40.0, 'tem_papel': False,
+         'escada': {'AL1': 0.0, 'AL2': 20.0, 'AL3': 40.0, 'AL4': 25.0, 'AL5': 15.0},
+         'tarefas': [{'tarefa': 'Produzir vídeos', 'horas_semana': 9, 'vezes': 8, 'nivel': 'AL3', 'proximo': 'AL4', 'critica': False,
+                      'mistura': {}, 'papel': 1, 'decisao': dec}],
+         'conexoes': [], 'fontes': {'claude': 1, 'codex': 1, 'conversas': 1, 'sozinhas': 1, 'acoes': 1, 'externos': 0, 'papel': 1}}
+    en = N.markdown(r, None, 'en')
+    assert 'My AI ladder' in en and 'Produce videos' in en and '3 of 20' in en and 'Produzir' not in en
+    assert 'Producir videos' in N.markdown(r, None, 'es')
+    with tempfile.TemporaryDirectory() as d:
+        Path(d, 'relatorio.json').write_text(json.dumps(r))
+        for lang, titulo in (('en', 'AI Level Certificate'), ('es', 'Certificado de nivel de IA'), ('pt', 'Certificado de nível de IA')):
+            out = Path(d, f'c-{lang}.html')
+            x = subprocess.run([sys.executable, str(RAIZ / 'medir' / 'certificado.py'), '--nome', 'Ana', '--registro', d,
+                                '--saida', str(out), '--lang', lang], capture_output=True, text=True)
+            assert x.returncode == 0, x.stderr
+            h = out.read_text()
+            assert titulo in h and f'lang="{"pt-BR" if lang == "pt" else lang}"' in h, lang
+        assert '40.0%' in Path(d, 'c-en.html').read_text() and '40,0%' in Path(d, 'c-es.html').read_text()
+
+
 def main():
     falhas = 0
     for f in OK:

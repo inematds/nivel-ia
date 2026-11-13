@@ -54,7 +54,7 @@ Uma página com o % do seu trabalho conduzido pela IA, a escada AL1–AL5, as ta
 git clone https://github.com/inematds/nivel-ia && cd nivel-ia
 python3 medir/nivel.py varrer --dias 30          # 1. mede os últimos 30 dias (nada sai da máquina)
 python3 medir/nivel.py relatorio                 # 2. monta o relatório
-python3 medir/certificado.py --nome "Seu Nome"   # 3. gera o certificado
+python3 medir/certificado.py --nome "Seu Nome"   # 3. gera o certificado (em inglês/espanhol: --lang en / --lang es)
 xdg-open registro/certificado-*.html             # 4. abre (no Mac: open) → botão "Salvar em PDF"
 ```
 
@@ -87,7 +87,7 @@ Terminal, Python 3.9 ou mais novo (só biblioteca padrão, sem instalar nada) e 
 
 ## Testes
 
-`python3 tests/run.py` (45 testes com logs falsos, nada da sua máquina).
+`python3 tests/run.py` (46 testes com logs falsos, nada da sua máquina).
 
 ## Privacidade
 

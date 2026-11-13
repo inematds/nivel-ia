@@ -12,19 +12,25 @@ Uso:
   python3 medir/nivel.py --registro /tmp/n90 varrer --dias 90
   python3 medir/nivel.py --registro /tmp/n90 relatorio
   python3 medir/certificado.py --nome "Seu Nome" --registro /tmp/n90
+  # em inglês ou espanhol:
+  python3 medir/certificado.py --nome "Your Name" --lang en
 """
 import argparse, datetime as dt, html, json, math, os, sys
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 REG = os.path.join(AQUI, '..', 'registro')
-NOMES = {'AL1': 'Você faz sozinho', 'AL2': 'A IA ajuda', 'AL3': 'A IA colabora',
-         'AL4': 'A IA conduz, você revisa', 'AL5': 'A IA roda sozinha'}
-EXPLICA = {'AL1': 'você faz sozinho; a IA não entra.',
-           'AL2': 'a IA ajuda: você pergunta, ela responde, você faz.',
-           'AL3': 'a IA colabora: trabalham juntos, você conduz cada passo.',
-           'AL4': 'a IA conduz e você revisa antes de sair.',
-           'AL5': 'a IA roda sozinha, com horário, regra e alarme.'}
-MESES = 'janeiro fevereiro março abril maio junho julho agosto setembro outubro novembro dezembro'.split()
+IDIOMAS = ('pt', 'en', 'es')
+LANG = 'pt'
+T = {}
+
+
+def usar_idioma(lang):
+    """carrega medir/idiomas_<lang>.json (o mesmo arquivo do relatório)"""
+    global LANG, T
+    LANG = lang if lang in IDIOMAS else 'pt'
+    T = json.load(open(os.path.join(AQUI, f'idiomas_{LANG}.json'), encoding='utf-8'))
+
+
 MIN_HORAS_SEMANA = 10      # semana com menos horas de trabalho com IA fica fora da curva (amostra pequena)
 MES_DIAS = 30.44
 
@@ -32,15 +38,18 @@ MES_DIAS = 30.44
 def data_br(d, curta=False):
     if isinstance(d, str):
         d = dt.date.fromisoformat(d[:10])
-    return f'{d.day:02d}/{d.month:02d}' if curta else f'{d.day} de {MESES[d.month - 1]} de {d.year}'
+    C = T['cert']
+    if curta:
+        return f'{d.month:02d}/{d.day:02d}' if LANG == 'en' else f'{d.day:02d}/{d.month:02d}'
+    return C['data_longa'].format(dia=d.day, mes=C['meses'][d.month - 1], ano=d.year)
 
 
 def num(x):
-    return f'{x:,.0f}'.replace(',', '.')
+    return f'{x:,.0f}' if LANG == 'en' else f'{x:,.0f}'.replace(',', '.')
 
 
 def pct(x):
-    return f'{x:.1f}'.replace('.', ',') + '%'
+    return f'{x:.1f}'.replace('.', T['cert']['decimal']) + '%'
 
 
 def semanas(caminho):
@@ -119,11 +128,13 @@ def grafico(pontos):
     datas = ''.join(f'<text x="{xs[i]:.1f}" y="{h-3}" class="rot" text-anchor="middle">{data_br(pontos[i][0], True)}</text>'
                     for i in range(0, len(pontos), passo))
     fim = f'<text x="{xs[-1]:.1f}" y="{ys[-1]-8:.1f}" class="vfim" text-anchor="end">{pct(pontos[-1][1])}</text>'
-    return (f'<svg viewBox="0 0 {w} {h}" class="graf" role="img" aria-label="Evolução semana a semana do trabalho conduzido pela IA">'
+    return (f'<svg viewBox="0 0 {w} {h}" class="graf" role="img" aria-label="{T['cert']['graf_aria']}">'
             f'{grade}<polygon points="{area}" class="area"/><polyline points="{linha}" class="lin"/>{marcas}{datas}{fim}</svg>')
 
 
 def montar(rel, curva, nome, origem_curva):
+    C, NOMES, EXPLICA = T['cert'], T['nomes'], T['explica']
+    tn = lambda t: T['tarefas'].get(t, t)
     e = rel['escada']
     hoje = rel['gerado_em'][:10]
     f = rel.get('fontes', {})
@@ -134,38 +145,39 @@ def montar(rel, curva, nome, origem_curva):
     tarefas = sorted((t for t in rel.get('tarefas', []) if not t['tarefa'].lower().startswith('outra')),
                      key=lambda t: -t.get('horas_semana', 0))[:4]
     linhas_t = ''.join(
-        f'<tr><td>{html.escape(t["tarefa"])}</td><td class="c">{t["nivel"]}</td>'
-        f'<td class="c">{(t.get("proximo") or "no teto")}</td></tr>' for t in tarefas)
+        f'<tr><td>{html.escape(tn(t["tarefa"]))}</td><td class="c">{t["nivel"]}</td>'
+        f'<td class="c">{(t.get("proximo") or C["no_teto"])}</td></tr>' for t in tarefas)
     escada = ''.join(f'<li><b>{k}</b> {EXPLICA[k]}</li>' for k in NOMES)
     # evolução
     if len(curva) >= 2:
         (d0, v0, _), (d1, v1, _) = curva[0], curva[-1]
-        rotulo = 'na semana de ' if origem_curva == 'semanas' else 'em '
-        evol = (f'<h2>Evolução {"semana a semana" if origem_curva == "semanas" else "por medição"}</h2>{grafico(curva)}'
-                f'<p class="evol">De <b>{pct(v0)}</b> {rotulo}{data_br(d0, True)} para <b>{pct(v1)}</b> {rotulo}{data_br(d1, True)}.</p>')
+        rotulo = C['rot_semana'] if origem_curva == 'semanas' else C['rot_medicao']
+        evol = (f'<h2>{C["evol_semanas"] if origem_curva == "semanas" else C["evol_medicoes"]}</h2>{grafico(curva)}'
+                '<p class="evol">' + C['evol_txt'].format(v0=pct(v0), v1=pct(v1), rot=rotulo, d0=data_br(d0, True), d1=data_br(d1, True)) + '</p>')
     else:
-        evol = '<p class="evol">Primeira medição registrada. A partir da próxima, este certificado mostra a sua evolução.</p>'
+        evol = f'<p class="evol">{C["primeira"]}</p>'
     # projeção
     # ponto de partida = nível atual (média ponderada das 2 últimas semanas), não a média do período inteiro
     if origem_curva == 'semanas' and len(curva) >= 2:
         ult = curva[-2:]
-        atual, rot_atual = sum(v * h for _, v, h in ult) / sum(h for _, _, h in ult), 'últimas 2 semanas'
+        atual, rot_atual = sum(v * h for _, v, h in ult) / sum(h for _, _, h in ult), C['ultimas2']
     else:
-        atual, rot_atual = rel['parte_ia'], 'hoje'
+        atual, rot_atual = rel['parte_ia'], C['hoje']
     proj = projecao(atual, inclinacao(curva))
     if proj:
-        caixas = ''.join(f'<div class="pj"><div class="pv">{pct(v)}</div><div class="pl">em {m} {"mês" if m == 1 else "meses"}</div></div>' for m, v in proj)
-        bloco_proj = (f'<h2>Projeção</h2><div class="pjs"><div class="pj hoje"><div class="pv">{pct(atual)}</div><div class="pl">{rot_atual}</div></div>{caixas}</div>'
-                      '<p class="nota">Esticando a curva das semanas medidas (crescimento em S, que desacelera perto de 100%). É projeção, não profecia.</p>')
+        caixas = ''.join(f'<div class="pj"><div class="pv">{pct(v)}</div><div class="pl">{C["em_mes"] if m == 1 else C["em_meses"].format(m=m)}</div></div>' for m, v in proj)
+        bloco_proj = (f'<h2>{C["projecao"]}</h2><div class="pjs"><div class="pj hoje"><div class="pv">{pct(atual)}</div><div class="pl">{rot_atual}</div></div>{caixas}</div>'
+                      f'<p class="nota">{C["proj_nota"]}</p>')
     else:
-        bloco_proj = ('<h2>Projeção</h2><p class="nota">Ainda sem tendência de alta medida (precisa de pelo menos 4 semanas com uso). '
-                      'Meça de novo nas próximas semanas.</p>')
+        bloco_proj = f'<h2>{C["projecao"]}</h2><p class="nota">{C["sem_tendencia"]}</p>'
     inicio = dt.date.fromisoformat(hoje) - dt.timedelta(days=rel.get('dias', 30))
-    periodo = f'nos últimos <b>{rel.get("dias", 30)} dias</b> (de {data_br(inicio)} a <b>{data_br(hoje)}</b>)'
-    papel = ' e da ficha de papel' if rel.get('tem_papel') else ''
+    periodo = C['periodo'].format(dias=rel.get('dias', 30), ini=data_br(inicio), fim=data_br(hoje))
+    papel = C['papel'] if rel.get('tem_papel') else ''
+    medido = C['medido'].format(periodo=periodo, papel=papel, conversas=num(f.get('conversas', 0)),
+                                sozinhas=num(f.get('sozinhas', 0)), acoes=num(f.get('acoes', 0)))
     return f'''<!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Certificado nivel-ia · {html.escape(nome)} · {data_br(hoje)}</title>
+<html lang="{C['html_lang']}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{C['titulo_pagina']} · {html.escape(nome)} · {data_br(hoje)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 @page{{size:A4 landscape;margin:0}}
@@ -208,31 +220,31 @@ ul.esc{{list-style:none;margin:0;padding:0;font-size:12px}} ul.esc li{{margin:2p
 @media (max-width:1150px){{.folha{{width:auto;height:auto;margin:8px;padding-bottom:8mm}} .grade{{grid-template-columns:1fr}} .rodape{{position:static;margin-top:8mm;flex-direction:column}}}}
 </style></head><body>
 <div class="folha">
-  <div class="topo"><span><b>INEMA<span class="ponto">.</span>CLUB</b> · kit nivel-ia</span><span>Escada de domínio da IA · AL1 a AL5</span></div>
-  <h1>Certificado de nível de IA</h1>
-  <p class="quem">Este certificado registra que o trabalho de</p>
+  <div class="topo"><span><b>INEMA<span class="ponto">.</span>CLUB</b> · {C['topo_esq']}</span><span>{C['topo_dir']}</span></div>
+  <h1>{C['h1']}</h1>
+  <p class="quem">{C['quem']}</p>
   <div class="nome">{html.escape(nome)}</div>
-  <p class="txt">foi medido {periodo}, a partir dos registros do Claude Code e do Codex da própria máquina{papel}: <b>{num(f.get("conversas", 0))}</b> conversas, <b>{num(f.get("sozinhas", 0))}</b> sessões que rodaram sozinhas e <b>{num(f.get("acoes", 0))}</b> ações da IA.</p>
+  <p class="txt">{medido}</p>
   <div class="grade">
     <div>
-      <div class="big"><span class="n">{pct(rel["parte_ia"])}</span><span class="l">do trabalho medido no período foi conduzido pela IA (AL4 + AL5)</span></div>
+      <div class="big"><span class="n">{pct(rel["parte_ia"])}</span><span class="l">{C['big']}</span></div>
       {barras}
       {evol}
     </div>
     <div>
-      <h2 style="margin-top:0">Tarefas principais</h2>
-      <table><tr><th>Tarefa</th><th class="c">Degrau</th><th class="c">Próximo</th></tr>{linhas_t}</table>
+      <h2 style="margin-top:0">{C['tarefas']}</h2>
+      <table><tr><th>{C['th_tarefa']}</th><th class="c">{C['th_degrau']}</th><th class="c">{C['th_proximo']}</th></tr>{linhas_t}</table>
       {bloco_proj}
-      <h2>A escada</h2>
+      <h2>{C['escada']}</h2>
       <ul class="esc">{escada}</ul>
     </div>
   </div>
   <div class="rodape">
-    <span>Medição registrada pelo kit aberto <b>nivel-ia</b> (inematds.github.io/nivel-ia). Os números vêm dos registros da própria máquina; não é avaliação oficial.</span>
-    <span>Emitido em <b>{data_br(hoje)}</b> · <b>inema.club</b></span>
+    <span>{C['rodape']}</span>
+    <span>{C['emitido'].format(data=data_br(hoje))} · <b>inema.club</b></span>
   </div>
 </div>
-<button class="botao" onclick="window.print()">Salvar em PDF / imprimir</button>
+<button class="botao" onclick="window.print()">{C['botao']}</button>
 </body></html>
 '''
 
@@ -242,18 +254,20 @@ def main():
     ap.add_argument('--nome', required=True, help='nome que aparece no certificado')
     ap.add_argument('--registro', default=REG, help='pasta do registro (a mesma do --registro do nivel.py)')
     ap.add_argument('--saida')
+    ap.add_argument('--lang', choices=IDIOMAS, default='pt', help='idioma do certificado (pt, en, es)')
     a = ap.parse_args()
+    usar_idioma(a.lang)
     arq = os.path.join(a.registro, 'relatorio.json')
     if not os.path.exists(arq):
-        sys.exit('Falta relatorio.json: rode antes  python3 medir/nivel.py varrer --dias 30  e  python3 medir/nivel.py relatorio')
+        sys.exit(T['cert']['falta_rel'])
     rel = json.load(open(arq, encoding='utf-8'))
     curva, origem = semanas(os.path.join(a.registro, 'sessoes.json')), 'semanas'
     if len(curva) < 2:
         curva, origem = historico(os.path.join(a.registro, 'historico.jsonl')), 'medicoes'
     hoje = rel['gerado_em'][:10]
-    saida = a.saida or os.path.join(a.registro, f'certificado-{hoje}.html')
+    saida = a.saida or os.path.join(a.registro, f'certificado-{hoje}{'' if LANG == 'pt' else '-' + LANG}.html')
     open(saida, 'w', encoding='utf-8').write(montar(rel, curva, a.nome, origem))
-    print(f'certificado: {os.path.abspath(saida)}  (abra no navegador; "Salvar em PDF" no botão)')
+    print(T['cert']['saida'].format(arq=os.path.abspath(saida)))
 
 
 if __name__ == '__main__':

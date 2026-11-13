@@ -34,10 +34,10 @@ Quién lo hace: 🧠 tú · ⚙️ script o temporizador
 2. 🧠 **En papel:** imprime la ficha (https://inematds.github.io/nivel-ia/kit/ficha-papel.es.html) y anota una línea por tarea (fecha, tarea, ¿crítica? s/n, peldaño 1 a 5, minutos, conexión usada, ¿corregí? n/p/g, ¿error grave? s/n). Sirve para cualquier IA y para lo que haces sin IA (AL1).
 3. 🧠 **Digitaliza la ficha** (opcional): copia `kit/papel-modelo.csv` en `registro/papel.csv`, ábrelo en una hoja de cálculo, escribe las líneas y guárdalo como CSV. Compruébalo con `python3 medir/nivel.py papel`. Si solo usas la ficha, puedes omitir los pasos 4 y 6: el informe del programa sale en portugués.
 4. ⚙️ **Automático:** `python3 medir/nivel.py varrer --dias 30` lee los registros de Claude Code y Codex de esta computadora y los guarda en `registro/sessoes.json`.
-5. ⚙️ **Informe:** `python3 medir/nivel.py relatorio` genera la escalera, las tareas, el próximo peldaño de cada una, las conexiones y «quién puede subir ahora» en `registro/relatorio.md` (combina la ficha en papel si existe).
+5. ⚙️ **Informe:** `python3 medir/nivel.py relatorio --lang es` genera la escalera, las tareas, el próximo peldaño de cada una, las conexiones y «quién puede subir ahora» en `registro/relatorio.md` (combina la ficha en papel si existe).
 6. ⚙️ **Todas las conexiones:** `python3 medir/nivel.py conexoes` enumera cada programa, sitio, servicio, agente y skill, con la primera y la última vez que se usaron.
 7. ⚙️ **Todos los días, automáticamente:** `sh systemd/instalar.sh` activa un temporizador a las 06:20 que repite los pasos 4 y 5 y guarda el historial en `registro/historico.jsonl`.
-8. ⚙️ **Certificado:** `python3 medir/certificado.py --nome "Tu Nombre"` genera `registro/certificado-AAAA-MM-DD.html`: escalón, escalera AL1–AL5, tareas, evolución semana a semana y proyección (1, 3 y 6 meses). Ábrelo en el navegador y usa el botón para guardarlo como PDF. Período más largo: `nivel.py --registro /tmp/n90 varrer --dias 90`, `nivel.py --registro /tmp/n90 relatorio` y `certificado.py --nome "Tu Nombre" --registro /tmp/n90`.
+8. ⚙️ **Certificado:** `python3 medir/certificado.py --nome "Tu Nombre" --lang es` genera `registro/certificado-AAAA-MM-DD-es.html`: escalón, escalera AL1–AL5, tareas, evolución semana a semana y proyección (1, 3 y 6 meses). Ábrelo en el navegador y usa el botón para guardarlo como PDF. Período más largo: `nivel.py --registro /tmp/n90 varrer --dias 90`, `nivel.py --registro /tmp/n90 relatorio --lang es` y `certificado.py --nome "Tu Nombre" --lang es --registro /tmp/n90`.
 9. 🧠 **Una vez por semana:** lee el informe, elige UNA tarea para subir un peldaño (criterios en ESCADA.md) y baja la que tuvo un error grave.
 
 ## 🎓 Certificado: paso a paso
@@ -46,25 +46,25 @@ Una página con el % de tu trabajo realizado por la IA, la escala AL1–AL5, las
 
 **La forma más fácil: pídeselo a tu IA.** Abre Claude Code o Codex y pega esto (cambia el nombre):
 
-> Descarga el kit https://github.com/inematds/nivel-ia en una carpeta nivel-ia (si ya existe, úsala), mide mis últimos 30 días con `python3 medir/nivel.py varrer --dias 30` y `python3 medir/nivel.py relatorio`, genera mi certificado con `python3 medir/certificado.py --nome "Tu Nombre"` y abre el certificado en el navegador. Al final, dime dónde quedaron el certificado y el informe y resume en 3 líneas qué resultado dio. No envíes nada a internet: todo es local.
+> Descarga el kit https://github.com/inematds/nivel-ia en una carpeta nivel-ia (si ya existe, úsala), mide mis últimos 30 días con `python3 medir/nivel.py varrer --dias 30` y `python3 medir/nivel.py relatorio --lang es`, genera mi certificado con `python3 medir/certificado.py --nome "Tu Nombre" --lang es` y abre el certificado en el navegador. Al final, dime dónde quedaron el certificado y el informe y resume en 3 líneas qué resultado dio. No envíes nada a internet: todo es local.
 
 **Hazlo tú, comando por comando** (Linux o Mac; en Windows, WSL; Python 3.9+; haber usado Claude Code o Codex en esta máquina):
 
 ```bash
 git clone https://github.com/inematds/nivel-ia && cd nivel-ia
 python3 medir/nivel.py varrer --dias 30          # 1. mide los últimos 30 días (nada sale de la máquina)
-python3 medir/nivel.py relatorio                 # 2. prepara el informe
-python3 medir/certificado.py --nome "Tu Nombre"   # 3. genera el certificado
+python3 medir/nivel.py relatorio --lang es                 # 2. prepara el informe
+python3 medir/certificado.py --nome "Tu Nombre" --lang es   # 3. genera el certificado
 xdg-open registro/certificado-*.html             # 4. abre (en Mac: open) → botón "Guardar em PDF"
 ```
 
-Período más largo (por ejemplo, 90 días), sin tocar el registro diario: `python3 medir/nivel.py --registro /tmp/n90 varrer --dias 90`, `python3 medir/nivel.py --registro /tmp/n90 relatorio` y `python3 medir/certificado.py --nome "Tu Nombre" --registro /tmp/n90` (Claude Code borra los registros de más de 30 días, a menos que aumentes `cleanupPeriodDays`).
+Período más largo (por ejemplo, 90 días), sin tocar el registro diario: `python3 medir/nivel.py --registro /tmp/n90 varrer --dias 90`, `python3 medir/nivel.py --registro /tmp/n90 relatorio --lang es` y `python3 medir/certificado.py --nome "Tu Nombre" --lang es --registro /tmp/n90` (Claude Code borra los registros de más de 30 días, a menos que aumentes `cleanupPeriodDays`).
 
 **Dónde quedan los archivos**
 
 | Archivo | Qué es |
 |---|---|
-| `registro/certificado-AAAA-MM-DD.html` | El certificado (ábrelo en el navegador → "Guardar como PDF") |
+| `registro/certificado-AAAA-MM-DD-es.html` | El certificado (ábrelo en el navegador → "Guardar como PDF") |
 | `registro/relatorio.md` | El informe completo: escala, tareas, próximo nivel, quién puede subir, conexiones |
 | `registro/relatorio.json` | Los mismos números en formato de datos (el certificado los lee de aquí) |
 | `registro/sessoes.json` | La medición sesión por sesión (solo en tu máquina, fuera de git) |
@@ -87,7 +87,7 @@ Terminal, Python 3.9 o posterior (solo biblioteca estándar, sin instalar nada) 
 
 ## Pruebas
 
-`python3 tests/run.py` (45 pruebas con registros falsos, nada de tu computadora).
+`python3 tests/run.py` (46 pruebas con registros falsos, nada de tu computadora).
 
 ## Privacidad
 

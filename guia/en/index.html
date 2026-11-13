@@ -315,12 +315,12 @@
   <div class="box"><p><b>What it proves, and what it does not:</b> it is a measurement recorded from your own machine’s records, not an official assessment. It lets you show your current standing and track progress from one measurement to the next. In the example, Nei over 90 days: he went from 11% to 61% of work conducted by AI.</p></div>
   <h3 style="margin-top:1.6em">The easiest way: ask your AI</h3>
   <p>Open <b>Claude Code</b> or <b>Codex</b> on your computer, paste the request below (replace the name), and wait a few minutes. It downloads the kit, measures your activity, generates the certificate, and opens it in your browser.</p>
-  <div class="box" style="user-select:all"><p>Download the kit from https://github.com/inematds/nivel-ia into a folder named nivel-ia (use it if it already exists), measure my last 30 days with <code>python3 medir/nivel.py varrer --dias 30</code> and <code>python3 medir/nivel.py relatorio</code>, generate my certificate with <code>python3 medir/certificado.py --nome "Your Name"</code>, and open the certificate in the browser. At the end, tell me where the certificate and report were saved and summarize the results in 3 lines. Don't send anything to the internet: everything stays local.</p></div>
+  <div class="box" style="user-select:all"><p>Download the kit from https://github.com/inematds/nivel-ia into a folder named nivel-ia (use it if it already exists), measure my last 30 days with <code>python3 medir/nivel.py varrer --dias 30</code> and <code>python3 medir/nivel.py relatorio --lang en</code>, generate my certificate with <code>python3 medir/certificado.py --nome "Your Name" --lang en</code>, and open the certificate in the browser. At the end, tell me where the certificate and report were saved and summarize the results in 3 lines. Don't send anything to the internet: everything stays local.</p></div>
   <p class="mut">Want 90 days? Add this to the request: "measure 90 days in a separate folder (<code>--registro /tmp/n90</code>), without changing the daily log."</p>
   <h3 style="margin-top:1.6em">Where the files are saved</h3>
   <table class="t">
     <tr><th>File</th><th>What it is</th></tr>
-    <tr><td><code>nivel-ia/registro/certificado-AAAA-MM-DD.html</code></td><td>The certificate. Open it in your browser and use the "Save as PDF" button.</td></tr>
+    <tr><td><code>nivel-ia/registro/certificado-AAAA-MM-DD-en.html</code></td><td>The certificate. Open it in your browser and use the "Save as PDF" button.</td></tr>
     <tr><td><code>nivel-ia/registro/relatorio.md</code></td><td>The full report: ladder, tasks, next step, who can advance, connections.</td></tr>
     <tr><td><code>nivel-ia/registro/relatorio.json</code></td><td>The same numbers in data format (the certificate reads them from here).</td></tr>
     <tr><td><code>nivel-ia/registro/sessoes.json</code></td><td>The session-by-session measurement (stored only on your machine, outside git).</td></tr>
@@ -376,7 +376,7 @@
   <div class="step"><div class="b">2</div><div><h3>Measure the last 30 days</h3><p>Reads the logs on this machine and saves <code>registro/sessoes.json</code> (outside git).</p>
 <pre><span class="k">python3 medir/nivel.py varrer</span> --dias 30   <span class="c"># "16701 sessões (9820 Claude Code, 6881 Codex) em 30 dias"</span></pre></div></div>
   <div class="step"><div class="b">3</div><div><h3>Read the report</h3><p>Ladder, tasks, next rung, who can move up or down, and connections. It’s saved in <code>registro/relatorio.md</code>. Background sessions from other programs are excluded, so the report counts slightly fewer than the scan. Note: the report, the command output and the column names of kit/papel-modelo.csv are in Portuguese (data, tarefa, nivel, minutos, conexao, corrigi, grave); the program also accepts the English names on the sheet (date, task, level, minutes, connection, fixed, serious) and y/yes.</p>
-<pre><span class="k">python3 medir/nivel.py relatorio</span>   <span class="c"># "A IA conduz **56.2%** do trabalho medido (AL4 + AL5)"</span></pre></div></div>
+<pre><span class="k">python3 medir/nivel.py relatorio --lang en</span>   <span class="c"># "A IA conduz **56.2%** do trabalho medido (AL4 + AL5)"</span></pre></div></div>
   <div class="step"><div class="b">4</div><div><h3>See all connections</h3><p>Each program, site, service, agent, and skill, with the number of sessions and the first and last time it appeared.</p>
 <pre><span class="k">python3 medir/nivel.py conexoes</span></pre></div></div>
   <div class="step"><div class="b">5</div><div><h3>Combine the paper sheet (and AL1)</h3><p>Copy the template to the <code>registro/</code> folder. Open <code>registro/papel.csv</code> in a spreadsheet (Excel, LibreOffice, or Google Sheets), enter one row for each time you did the task, and save it again as CSV. Dates can be dd/mm/yyyy or yyyy-mm-dd; column names can match the printed sheet in Portuguese, English, or Spanish. Then check: the program will warn you if it can’t understand a row or column. The next report will add everything together.</p>
@@ -385,12 +385,12 @@
   <div class="step"><div class="b">6</div><div><h3>Run automatically every day</h3><p>Turns on a timer at 06:20 that measures and saves the history in <code>registro/historico.jsonl</code>.</p>
 <pre><span class="k">sh systemd/instalar.sh</span>   <span class="c"># undo: systemctl --user disable --now nivel-ia.timer</span></pre></div></div>
   <div class="step"><div class="b">7</div><div><h3>Generate your certificate</h3><p>A page with your rung, week-by-week progress, and projection. Open the file in a browser and use “Save as PDF”. For a longer period (e.g., 90 days), measure in a separate folder without changing the daily record.</p>
-<pre><span class="k">python3</span> medir/certificado.py --nome <span class="s">"Your Name"</span>   <span class="c"># saves registro/certificado-AAAA-MM-DD.html</span>
+<pre><span class="k">python3</span> medir/certificado.py --nome <span class="s">"Your Name"</span> --lang en   <span class="c"># saves registro/certificado-AAAA-MM-DD-en.html</span>
 <span class="c"># 90 days:</span>
 <span class="k">python3</span> medir/nivel.py --registro /tmp/n90 varrer --dias 90
-<span class="k">python3</span> medir/nivel.py --registro /tmp/n90 relatorio
-<span class="k">python3</span> medir/certificado.py --nome <span class="s">"Your Name"</span> --registro /tmp/n90</pre></div></div>
-  <div class="step"><div class="b">8</div><div><h3>Decide once a week</h3><p>Choose ONE task to move up a rung using the criterion above, and move down the one with a serious mistake. Kit tests: <code>python3 tests/run.py</code> (45 tests with fake records).</p></div></div>
+<span class="k">python3</span> medir/nivel.py --registro /tmp/n90 relatorio --lang en
+<span class="k">python3</span> medir/certificado.py --nome <span class="s">"Your Name"</span> --lang en --registro /tmp/n90</pre></div></div>
+  <div class="step"><div class="b">8</div><div><h3>Decide once a week</h3><p>Choose ONE task to move up a rung using the criterion above, and move down the one with a serious mistake. Kit tests: <code>python3 tests/run.py</code> (46 tests with fake records).</p></div></div>
 </div></section>
 
 <section id="passo-certificado"><div class="wrap">
@@ -403,16 +403,16 @@
   <div class="step"><div class="b">2</div><div><h3>Measure the last 30 days</h3><p>Reads the Claude Code and Codex logs on this machine. Nothing leaves your computer.</p>
 <pre><span class="k">python3</span> medir/nivel.py varrer --dias 30</pre></div></div>
   <div class="step"><div class="b">3</div><div><h3>Build the report</h3><p>Writes <code>registro/relatorio.md</code> (for reading) and <code>registro/relatorio.json</code> (for the certificate).</p>
-<pre><span class="k">python3</span> medir/nivel.py relatorio</pre></div></div>
-  <div class="step"><div class="b">4</div><div><h3>Generate the certificate</h3><p>Writes <code>registro/certificado-AAAA-MM-DD.html</code> and shows the path.</p>
-<pre><span class="k">python3</span> medir/certificado.py --nome <span class="s">"Your Name"</span></pre></div></div>
+<pre><span class="k">python3</span> medir/nivel.py relatorio --lang en</pre></div></div>
+  <div class="step"><div class="b">4</div><div><h3>Generate the certificate</h3><p>Writes <code>registro/certificado-AAAA-MM-DD-en.html</code> and shows the path.</p>
+<pre><span class="k">python3</span> medir/certificado.py --nome <span class="s">"Your Name"</span> --lang en</pre></div></div>
   <div class="step"><div class="b">5</div><div><h3>Open and save as PDF</h3><p>In your browser, click "Save as PDF / print" and choose "Save as PDF". The page is already set to landscape A4.</p>
 <pre><span class="k">xdg-open</span> registro/certificado-*.html   <span class="c"># Linux</span>
 <span class="k">open</span> registro/certificado-*.html       <span class="c"># Mac</span></pre></div></div>
   <div class="step"><div class="b">6</div><div><h3>Longer period (optional)</h3><p>Measure into a separate folder so you don't change the daily log. It can only go back as far as the machine keeps logs: Claude Code deletes logs older than 30 days unless you have increased <code>cleanupPeriodDays</code>.</p>
 <pre><span class="k">python3</span> medir/nivel.py --registro /tmp/n90 varrer --dias 90
-<span class="k">python3</span> medir/nivel.py --registro /tmp/n90 relatorio
-<span class="k">python3</span> medir/certificado.py --nome <span class="s">"Your Name"</span> --registro /tmp/n90   <span class="c"># saved in /tmp/n90/</span></pre></div></div>
+<span class="k">python3</span> medir/nivel.py --registro /tmp/n90 relatorio --lang en
+<span class="k">python3</span> medir/certificado.py --nome <span class="s">"Your Name"</span> --lang en --registro /tmp/n90   <span class="c"># saved in /tmp/n90/</span></pre></div></div>
   <div class="step"><div class="b">7</div><div><h3>Track progress over time (optional)</h3><p>Measures automatically every day at 06:20. Generate a new certificate whenever you want (step 4): with more weeks of data, the chart and projection improve.</p>
 <pre><span class="k">sh</span> systemd/instalar.sh</pre></div></div>
 </div></section>

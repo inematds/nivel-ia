@@ -391,7 +391,7 @@
 <span class="k">python3</span> medir/nivel.py --registro /tmp/n90 varrer --dias 90
 <span class="k">python3</span> medir/nivel.py --registro /tmp/n90 relatorio
 <span class="k">python3</span> medir/certificado.py --nome <span class="s">"Seu Nome"</span> --registro /tmp/n90</pre></div></div>
-  <div class="step"><div class="b">8</div><div><h3>Uma vez por semana, decida</h3><p>Escolha UMA tarefa para subir um degrau pelo critério acima, e desça a que errou feio. Testes do kit: <code>python3 tests/run.py</code> (45 testes com registros falsos).</p></div></div>
+  <div class="step"><div class="b">8</div><div><h3>Uma vez por semana, decida</h3><p>Escolha UMA tarefa para subir um degrau pelo critério acima, e desça a que errou feio. Testes do kit: <code>python3 tests/run.py</code> (46 testes com registros falsos).</p></div></div>
 </div></section>
 
 <section id="passo-certificado"><div class="wrap">
@@ -405,7 +405,7 @@
 <pre><span class="k">python3</span> medir/nivel.py varrer --dias 30</pre></div></div>
   <div class="step"><div class="b">3</div><div><h3>Monte o relatório</h3><p>Grava <code>registro/relatorio.md</code> (para ler) e <code>registro/relatorio.json</code> (para o certificado).</p>
 <pre><span class="k">python3</span> medir/nivel.py relatorio</pre></div></div>
-  <div class="step"><div class="b">4</div><div><h3>Gere o certificado</h3><p>Grava <code>registro/certificado-AAAA-MM-DD.html</code> e mostra o caminho.</p>
+  <div class="step"><div class="b">4</div><div><h3>Gere o certificado</h3><p>Grava <code>registro/certificado-AAAA-MM-DD.html</code> e mostra o caminho. Em inglês ou espanhol, acrescente <code>--lang en</code> ou <code>--lang es</code> (vale também para o relatório: <code>nivel.py relatorio --lang en</code>).</p>
 <pre><span class="k">python3</span> medir/certificado.py --nome <span class="s">"Seu Nome"</span></pre></div></div>
   <div class="step"><div class="b">5</div><div><h3>Abra e salve em PDF</h3><p>No navegador, clique em "Salvar em PDF / imprimir" e escolha "Salvar como PDF". A folha já vem em A4 deitado.</p>
 <pre><span class="k">xdg-open</span> registro/certificado-*.html   <span class="c"># Linux</span>
