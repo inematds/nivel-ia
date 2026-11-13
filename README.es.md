@@ -40,6 +40,35 @@ Quién lo hace: 🧠 tú · ⚙️ script o temporizador
 8. ⚙️ **Certificado:** `python3 medir/certificado.py --nome "Tu Nombre"` genera `registro/certificado-AAAA-MM-DD.html`: escalón, escalera AL1–AL5, tareas, evolución semana a semana y proyección (1, 3 y 6 meses). Ábrelo en el navegador y usa el botón para guardarlo como PDF. Período más largo: `nivel.py --registro /tmp/n90 varrer --dias 90`, `nivel.py --registro /tmp/n90 relatorio` y `certificado.py --nome "Tu Nombre" --registro /tmp/n90`.
 9. 🧠 **Una vez por semana:** lee el informe, elige UNA tarea para subir un peldaño (criterios en ESCADA.md) y baja la que tuvo un error grave.
 
+## 🎓 Certificado: paso a paso
+
+Una página con el % de tu trabajo realizado por la IA, la escala AL1–AL5, las tareas principales, la evolución semana a semana y la proyección para 1, 3 y 6 meses. Es HTML: se abre en cualquier navegador y se convierte en PDF con el botón "Guardar como PDF".
+
+**La forma más fácil: pídeselo a tu IA.** Abre Claude Code o Codex y pega esto (cambia el nombre):
+
+> Descarga el kit https://github.com/inematds/nivel-ia en una carpeta nivel-ia (si ya existe, úsala), mide mis últimos 30 días con `python3 medir/nivel.py varrer --dias 30` y `python3 medir/nivel.py relatorio`, genera mi certificado con `python3 medir/certificado.py --nome "Tu Nombre"` y abre el certificado en el navegador. Al final, dime dónde quedaron el certificado y el informe y resume en 3 líneas qué resultado dio. No envíes nada a internet: todo es local.
+
+**Hazlo tú, comando por comando** (Linux o Mac; en Windows, WSL; Python 3.9+; haber usado Claude Code o Codex en esta máquina):
+
+```bash
+git clone https://github.com/inematds/nivel-ia && cd nivel-ia
+python3 medir/nivel.py varrer --dias 30          # 1. mide los últimos 30 días (nada sale de la máquina)
+python3 medir/nivel.py relatorio                 # 2. prepara el informe
+python3 medir/certificado.py --nome "Tu Nombre"   # 3. genera el certificado
+xdg-open registro/certificado-*.html             # 4. abre (en Mac: open) → botón "Guardar em PDF"
+```
+
+Período más largo (por ejemplo, 90 días), sin tocar el registro diario: `python3 medir/nivel.py --registro /tmp/n90 varrer --dias 90`, `python3 medir/nivel.py --registro /tmp/n90 relatorio` y `python3 medir/certificado.py --nome "Tu Nombre" --registro /tmp/n90` (Claude Code borra los registros de más de 30 días, a menos que aumentes `cleanupPeriodDays`).
+
+**Dónde quedan los archivos**
+
+| Archivo | Qué es |
+|---|---|
+| `registro/certificado-AAAA-MM-DD.html` | El certificado (ábrelo en el navegador → "Guardar como PDF") |
+| `registro/relatorio.md` | El informe completo: escala, tareas, próximo nivel, quién puede subir, conexiones |
+| `registro/relatorio.json` | Los mismos números en formato de datos (el certificado los lee de aquí) |
+| `registro/sessoes.json` | La medición sesión por sesión (solo en tu máquina, fuera de git) |
+
 ## Requisitos
 
 Terminal, Python 3.9 o posterior (solo biblioteca estándar, sin instalar nada) y git para descargarlo (o descarga el ZIP: https://github.com/inematds/nivel-ia/archive/refs/heads/main.zip). Linux o macOS (en Windows, usa WSL). El temporizador usa systemd (Linux). Sin red, sin API: nada sale de tu computadora.
