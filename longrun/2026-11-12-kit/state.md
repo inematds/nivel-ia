@@ -1,17 +1,14 @@
-# Estado — nivel-ia (12/11/2026, ~15:45) — NADA PUBLICADO
+# Estado — nivel-ia (12/11/2026, ~23:35) — PUBLICADO
 
-## Feito (commits locais, sem remoto: 1a5a474 → 84e1cdb)
-- Kit: ESCADA.md (AL1–AL5, como anotar n/p/g + erro grave + crítica, subir por degrau, descer, sem contradição), fichas PT/EN/ES (kit/ficha-papel*.html, cabeçalhos sem vírgula, mapeados por medir/nivel.py chave_coluna), papel-modelo.csv, medir/nivel.py (Claude Code + ~/.codex*, todas as conexões + as da ficha, decidir() por degrau atual, crítica por ficha ou palavra, relatório só com ficha), systemd (instalar.sh NUNCA rodado), 42 testes (`python3 tests/run.py`).
-- Guia PT/EN/ES montado (scratchpad: corpo-pt.html + monta.py + fixvis.py + traduz-guia.sh em /tmp/claude-1000/-home-nmaldaner-projetos-wifi/1d269469-b102-4968-8f8d-be1ad8a9a55e/scratchpad/ — temporário; se sumiu, editar guia/index.html direto e retraduzir em 2 partes pelo inema-traduz). 6 banners + capa conferidos.
-- Revisores 1–5: 6, 7, 5, 6, 6 (todos registrados em revisor-nota.py). Ciclo de revisão ENCERRADO (advisor): próximo revisor só bloqueia hero, escala 1–5, texto de evolução ou comando que falha.
+## Feito
+- Bloqueio 1 resolvido: as 1.202 sessões "AL5 com conversa" eram todas Claude `sdk-cli` (app/bot interativo, até 56 mensagens). Regra nova: AL5 só se aberta por SDK/exec com até 2 mensagens humanas (`CONVERSA_MIN = 3`). Resultado: 56,2% (AL2 3,3 · AL3 40,5 · AL4 28,2 · AL5 28,0), dentro da faixa 55–72%.
+- Palavras-chave das tarefas casam no começo da palavra ('apagou' ≠ 'pago'); 'client' removido. 44 testes passam.
+- exemplo/relatorio-agregado.json regerado; Caso real PT reescrito e EN/ES retraduzidos pelo inema-traduz (só o trecho); regra AL5 atualizada em guia/README/ESCADA nos 3 idiomas. Commit b055839.
+- systemd/instalar.sh rodado: timer nivel-ia 06:20.
+- GitHub: inematds/nivel-ia público, Pages por Actions; 3 guias + 3 fichas + banners = 200.
+- Portal: 9bf6c61 (card + projectUpdatesData + EN/ES 10214), inemabuscas df35321, inemapro c6af002.
+- Telegram INEMA.AGENTES: envio agendado depois de 23:55 (janela do sync).
 
-## BLOQUEIOS antes de publicar
-1. **75,4% não validado (fora da faixa 55–72% do goal).** 1.202 sessões (354,8 h) marcadas automáticas com humanos ≥ 2 e sem via_bot; 171,7 h em ~/projetos/wifi com 1º pedido de conversa do Nei (link artifact + YouTube). As sessões Claude do wifi são entrypoint "cli" → suspeita: são do Codex (fonte codex, originator codex_exec chamado pelo Claude) ou outro caminho. Próximo passo: `python3 -c` em registro/sessoes.json filtrando automatica & humanos>=2 & not via_bot, agrupar por `fonte` e `arquivo`; corrigir a regra (positiva: Claude `sdk-*` = automático; Codex `codex_exec` = automático só se não houver conversa real), rerodar varrer/relatorio.
-2. **Exemplo e "Caso real" velhos:** TAREFAS_PADRAO mudou (nova crítica "Clientes e dinheiro"; `client`/`pago` são substrings perigosas — "MCP client", "apagou": trocar por palavras com borda). Regerar exemplo/relatorio-agregado.json e atualizar números do Caso real nos 3 idiomas; TIRAR a frase "E-mail e agenda 49%".
-3. Rodar `sh systemd/instalar.sh` uma vez.
-
-## Depois
-- gh repo create inematds/nivel-ia --public; push via SSH (tem .github/workflows); Pages build_type=workflow; 3 guias + 3 fichas → 200.
-- atualiza-portal (com EN/ES); postar-telegram INEMA.AGENTES.
-- Vídeo: perguntar ao Nei se o vídeo com avatar "Qual o nível que você domina a IA?" (explicavideos/textos/nivel-ia, cadeia em "entrega") é o vídeo do kit; não fazer outro sem ele dizer.
-- Perguntar ao Nei: o card/timer/repo antigo niveis-autonomia (não mexido).
+## Pendente (decisão do Nei)
+- Vídeo: o avatar "Qual o nível que você domina a IA?" (explicavideos/textos/nivel-ia) é o vídeo deste kit → lives3? Não fazer outro sem ele dizer.
+- Card/timer/repo antigo niveis-autonomia: tirar ou manter (não mexido).
