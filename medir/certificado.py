@@ -173,6 +173,9 @@ def montar(rel, curva, nome, origem_curva):
     inicio = dt.date.fromisoformat(hoje) - dt.timedelta(days=rel.get('dias', 30))
     periodo = C['periodo'].format(dias=rel.get('dias', 30), ini=data_br(inicio), fim=data_br(hoje))
     papel = C['papel'] if rel.get('tem_papel') else ''
+    fontes_nome = {'claude': 'Claude Code', 'codex': 'Codex'}
+    curta = ''.join(f'<p class="nota aviso">{C["curta"].format(fonte=fontes_nome.get(k, k), n=c["dias"], dias=rel.get("dias", 30), desde=data_br(c["desde"]))}</p>'
+                    for k, c in rel.get('cobertura_curta', {}).items())
     medido = C['medido'].format(periodo=periodo, papel=papel, conversas=num(f.get('conversas', 0)),
                                 sozinhas=num(f.get('sozinhas', 0)), acoes=num(f.get('acoes', 0)))
     return f'''<!doctype html>
@@ -212,6 +215,7 @@ th{{font:600 10.5px Sora,sans-serif;color:var(--mut);text-align:left;padding:0 4
 .pj.hoje{{background:var(--tinta);color:#fff;border-color:var(--tinta)}} .pj.hoje .pl{{color:#ddd}}
 .pv{{font:800 17px Sora,sans-serif}} .pl{{font-size:11px;color:var(--mut)}}
 .nota{{font-size:11px;color:var(--mut);margin:4px 0 0}}
+.aviso{{color:#9a3412;font-weight:600}}
 ul.esc{{list-style:none;margin:0;padding:0;font-size:12px}} ul.esc li{{margin:2px 0}} ul.esc b{{display:inline-block;width:30px;font:800 11.5px Sora,sans-serif}}
 .rodape{{position:absolute;left:15mm;right:15mm;bottom:10mm;display:flex;justify-content:space-between;gap:10mm;font-size:10.5px;color:var(--mut);border-top:1px solid var(--linha);padding-top:5px}}
 .rodape b{{color:var(--tinta)}}
@@ -224,7 +228,7 @@ ul.esc{{list-style:none;margin:0;padding:0;font-size:12px}} ul.esc li{{margin:2p
   <h1>{C['h1']}</h1>
   <p class="quem">{C['quem']}</p>
   <div class="nome">{html.escape(nome)}</div>
-  <p class="txt">{medido}</p>
+  <p class="txt">{medido}</p>{curta}
   <div class="grade">
     <div>
       <div class="big"><span class="n">{pct(rel["parte_ia"])}</span><span class="l">{C['big']}</span></div>

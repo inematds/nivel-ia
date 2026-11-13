@@ -44,9 +44,9 @@ Quem faz: 🧠 você · ⚙️ script ou timer
 
 Uma página com o % do seu trabalho conduzido pela IA, a escada AL1–AL5, as tarefas principais, a evolução semana a semana e a projeção para 1, 3 e 6 meses. É HTML: abre em qualquer navegador e vira PDF no botão "Salvar em PDF".
 
-**Jeito mais fácil: peça à sua IA.** Abra o Claude Code ou o Codex e cole (troque o nome):
+**Jeito mais fácil (forma B): peça à sua IA.** Abra o Claude Code ou o Codex e cole (troque o nome). Dados confidenciais? Use o jeito do terminal, logo abaixo (veja Privacidade).
 
-> Baixe o kit https://github.com/inematds/nivel-ia numa pasta nivel-ia (se já existir, use ela), meça os meus últimos 30 dias com `python3 medir/nivel.py varrer --dias 30` e `python3 medir/nivel.py relatorio`, gere o meu certificado com `python3 medir/certificado.py --nome "Seu Nome"` e abra o certificado no navegador. No fim, me diga onde ficaram o certificado e o relatório e resuma em 3 linhas o que deu. Não mande nada para a internet: é tudo local.
+> Baixe o kit https://github.com/inematds/nivel-ia numa pasta nivel-ia (se já existir, use ela), meça os meus últimos 30 dias com `python3 medir/nivel.py varrer --dias 30` e `python3 medir/nivel.py relatorio`, gere o meu certificado com `python3 medir/certificado.py --nome "Seu Nome"` e abra o certificado no navegador. No fim, me diga onde ficaram o certificado e o relatório e resuma em 3 linhas o que deu. Não envie os meus dados para nenhum outro serviço nem site.
 
 **Você mesmo, comando por comando** (Linux ou Mac; no Windows, WSL; Python 3.9+; ter usado o Claude Code ou o Codex nesta máquina):
 
@@ -58,7 +58,7 @@ python3 medir/certificado.py --nome "Seu Nome"   # 3. gera o certificado (em ing
 xdg-open registro/certificado-*.html             # 4. abre (no Mac: open) → botão "Salvar em PDF"
 ```
 
-Período maior (ex.: 90 dias), sem mexer no registro diário: `python3 medir/nivel.py --registro /tmp/n90 varrer --dias 90`, `python3 medir/nivel.py --registro /tmp/n90 relatorio` e `python3 medir/certificado.py --nome "Seu Nome" --registro /tmp/n90` (o Claude Code apaga registros de mais de 30 dias, a não ser que você aumente o `cleanupPeriodDays`).
+Período maior (ex.: 90 dias), sem mexer no registro diário: `python3 medir/nivel.py --registro /tmp/n90 varrer --dias 90`, `python3 medir/nivel.py --registro /tmp/n90 relatorio` e `python3 medir/certificado.py --nome "Seu Nome" --registro /tmp/n90`. O Claude Code apaga registros com mais de 30 dias, a não ser que você aumente o `cleanupPeriodDays`; o que já foi apagado não volta. Se os registros cobrirem menos dias do que o pedido, o medidor avisa no terminal, no relatório e no certificado.
 
 **Onde ficam os arquivos**
 
@@ -90,6 +90,8 @@ Terminal, Python 3.9 ou mais novo (só biblioteca padrão, sem instalar nada) e 
 `python3 tests/run.py` (46 testes com logs falsos, nada da sua máquina).
 
 ## Privacidade
+
+**Duas formas de rodar.** O medidor é Python puro e roda só na sua máquina, sem internet. **A. Pelo terminal**: você roda os comandos e abre o certificado; nada sai do computador. **B. Pedindo à sua IA**: o Claude Code ou o Codex roda os comandos e lê o relatório para resumir, e essa leitura passa pelo servidor do provedor (Anthropic ou OpenAI), como qualquer sessão. O relatório traz os nomes das tarefas e as conexões (programas, agentes, skills e sites). **Dados confidenciais (trabalho de cliente, sigilo): use a forma A.**
 
 `registro/` fica fora do git. O primeiro pedido de cada sessão é guardado curto e com chaves, e-mails e números longos trocados por `[oculto]`.
 

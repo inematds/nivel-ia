@@ -48,6 +48,7 @@
  "rel": {
   "titulo": "My AI ladder",
   "ultimos": "{data} · last {dias} days",
+  "curta": "Attention: you requested {dias} days, but the {fonte} records cover only {n} days (since {desde}). For {fonte}, the result applies only to that period. Claude Code deletes records older than 30 days unless you increase cleanupPeriodDays; anything already deleted cannot be recovered.",
   "conduz": "AI leads **{pct}%** of the measured work (AL4 + AL5)",
   "anterior": "In the previous measurement: {ant}% ({dif} points).",
   "tab_escada": "Level | What it means | Share of time",
@@ -98,6 +99,7 @@
   "h1": "AI Level Certificate",
   "quem": "This certificate records that the work of",
   "periodo": "over the last <b>{dias} days</b> (from {ini} to <b>{fim}</b>)",
+  "curta": "Attention: the {fonte} records cover only {n} of the {dias} requested days (since {desde}).",
   "medido": "was measured {periodo}, based on records from Claude Code and Codex on this machine{papel}: <b>{conversas}</b> conversations, <b>{sozinhas}</b> sessions that ran on their own, and <b>{acoes}</b> AI actions.",
   "papel": " and the paper sheet",
   "big": "of the work measured during this period was led by AI (AL4 + AL5)",

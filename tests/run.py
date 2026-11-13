@@ -460,5 +460,20 @@ def main():
     return 1 if falhas else 0
 
 
+@caso
+def t_aviso_periodo_curto():
+    """pediu 90 dias: avisa a fonte que cobre menos (Claude), cala a que cobre tudo (Codex) e cala no pedido de 30"""
+    agora = N.epoch('2026-11-13T12:00:00Z')
+    cl = sess(1, 20); cl['inicio'] = agora - 80 * 86400
+    cx = sess(1, 20); cx['fonte'] = 'codex'; cx['inicio'] = agora - 89 * 86400
+    c = N.cobertura([cl, cx], 90, agora)
+    assert list(c) == ['claude'] and c['claude']['dias'] == 81, c
+    assert N.cobertura([cl, cx], 30, agora) == {}
+    r = N.montar([cl, cx], [], N.carregar_tarefas(), 90, c)
+    for lang in ('pt', 'en', 'es'):
+        md = N.markdown(r, None, lang)
+        assert 'Claude Code' in md.split('\n## ')[0] and 'cleanupPeriodDays' in md, lang
+
+
 if __name__ == '__main__':
     sys.exit(main())

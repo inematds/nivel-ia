@@ -43,6 +43,7 @@ NOMES = {'AL1': 'Você faz sozinho', 'AL2': 'A IA ajuda', 'AL3': 'A IA colabora'
          'AL4': 'A IA conduz, você revisa', 'AL5': 'A IA roda sozinha'}
 NIVEIS = list(NOMES)
 IDIOMAS = ('pt', 'en', 'es')
+FONTE = {'claude': 'Claude Code', 'codex': 'Codex'}
 
 
 def idioma(lang='pt'):
@@ -397,7 +398,24 @@ def ler_papel(arq):
 
 
 # ---------------------------------------------------------------- relatório
-def montar(sessoes, papel, tarefas, dias):
+FOLGA_DIAS = 3  # registros que começam até 3 dias depois do início pedido não geram aviso
+
+
+def cobertura(sessoes, dias, agora):
+    """por fonte (claude/codex): quando começam os registros, se cobrem MENOS dias do que foi pedido.
+    O Claude Code apaga registros com mais de 30 dias (cleanupPeriodDays); quem começou há pouco também cai aqui."""
+    out = {}
+    for f in ('claude', 'codex'):
+        ts = [s['inicio'] for s in sessoes if s.get('fonte') == f and s.get('inicio')]
+        if not ts:
+            continue
+        n = int((agora - min(ts)) // 86400) + 1
+        if n < dias - FOLGA_DIAS:
+            out[f] = dict(desde=datetime.fromtimestamp(min(ts)).date().isoformat(), dias=n)
+    return out
+
+
+def montar(sessoes, papel, tarefas, dias, curta=None):
     regras = {n: c for n, c, _ in tarefas}
     sess = [s for s in sessoes if not any(b in s['primeiro'].lower() for b in BASTIDORES)]
     por_nivel = collections.Counter()
@@ -432,7 +450,7 @@ def montar(sessoes, papel, tarefas, dias):
                           decisao=decidir(prox, linhas, nv, critica),
                           mistura={k: round(v / sum(g['niv'].values()) * 100) for k, v in g['niv'].most_common()}))
     conex = registro_conexoes(sess, papel)
-    return dict(gerado_em=datetime.now().astimezone().isoformat(timespec='seconds'), dias=dias,
+    return dict(gerado_em=datetime.now().astimezone().isoformat(timespec='seconds'), dias=dias, cobertura_curta=curta or {},
                 escada={n: round(100 * por_nivel[n] / total, 1) for n in NIVEIS},
                 parte_ia=round(100 * (por_nivel['AL4'] + por_nivel['AL5']) / total, 1),
                 tem_papel=bool(papel),
@@ -514,8 +532,10 @@ def markdown(r, anterior, lang='pt'):
         if d['chave'] == 'grave_em' and not q.get('data'):
             q['data'] = T['motivos']['grave_alguma']
         return T['motivos'][d['chave']].format(**q)
-    L = ['# ' + R['titulo'], '', R['ultimos'].format(data=r['gerado_em'][:10], dias=r['dias']), '',
-         '## ' + R['conduz'].format(pct=r['parte_ia']), '']
+    L = ['# ' + R['titulo'], '', R['ultimos'].format(data=r['gerado_em'][:10], dias=r['dias']), '']
+    for f, c in r.get('cobertura_curta', {}).items():
+        L += ['> ' + R['curta'].format(fonte=FONTE[f], desde=c['desde'], n=c['dias'], dias=r['dias']), '']
+    L += ['## ' + R['conduz'].format(pct=r['parte_ia']), '']
     if anterior is not None:
         L += [R['anterior'].format(ant=anterior, dif=f"{r['parte_ia'] - anterior:+.1f}"), '']
     L += [R['tab_escada'], '--- | --- | ---']
@@ -572,6 +592,9 @@ def cmd_varrer(a):
                               ensure_ascii=False), encoding='utf-8')
     tmp.replace(a.registro / 'sessoes.json')
     n = collections.Counter(s['fonte'] for s in sessoes)
+    R = idioma(getattr(a, 'lang', 'pt'))['rel']
+    for f, c in cobertura(sessoes, a.dias, time.time()).items():
+        print('AVISO: ' + R['curta'].format(fonte=FONTE[f], desde=c['desde'], n=c['dias'], dias=a.dias), file=sys.stderr)
     print(f"{len(sessoes)} sessões ({n['claude']} Claude Code, {n['codex']} Codex) em {a.dias} dias → {a.registro / 'sessoes.json'}")
 
 
@@ -586,7 +609,11 @@ def carregar(a):
     papel, erros = ler_papel(a.registro / 'papel.csv')
     for e in erros:
         print('Aviso na ficha de papel,', e, file=sys.stderr)
-    return montar(d['sessoes'], papel, carregar_tarefas(), d['dias'])
+    try:
+        agora = datetime.fromisoformat(d['gerado_em']).timestamp()
+    except (KeyError, ValueError):
+        agora = time.time()
+    return montar(d['sessoes'], papel, carregar_tarefas(), d['dias'], cobertura(d['sessoes'], d['dias'], agora))
 
 
 def cmd_relatorio(a):

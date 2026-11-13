@@ -44,9 +44,9 @@ Who does what: 🧠 you · ⚙️ script or timer
 
 A page showing the percentage of your work handled by AI, the AL1–AL5 ladder, your main tasks, week-by-week progress, and projections for 1, 3, and 6 months. It's HTML: open it in any browser and turn it into a PDF with the "Save as PDF" button.
 
-**The easiest way: ask your AI.** Open Claude Code or Codex and paste this (replace the name):
+**Easiest way (Option B): ask your AI.** Open Claude Code or Codex and paste this (replace the name). Confidential data? Use the terminal method below (see Privacy).
 
-> Download the kit from https://github.com/inematds/nivel-ia into a folder named nivel-ia (use it if it already exists), measure my last 30 days with `python3 medir/nivel.py varrer --dias 30` and `python3 medir/nivel.py relatorio --lang en`, generate my certificate with `python3 medir/certificado.py --nome "Your Name" --lang en`, and open the certificate in the browser. At the end, tell me where the certificate and report were saved and summarize the results in 3 lines. Don't send anything to the internet: everything stays local.
+> Download the kit from https://github.com/inematds/nivel-ia into a folder named nivel-ia (use it if it already exists), measure my last 30 days with `python3 medir/nivel.py varrer --dias 30` and `python3 medir/nivel.py relatorio --lang en`, generate my certificate with `python3 medir/certificado.py --nome "Your Name" --lang en`, and open the certificate in the browser. At the end, tell me where the certificate and report were saved and summarize the results in 3 lines. Do not send my data to any other service or site.
 
 **Do it yourself, one command at a time** (Linux or Mac; on Windows, WSL; Python 3.9+; must have used Claude Code or Codex on this machine):
 
@@ -58,7 +58,7 @@ python3 medir/certificado.py --nome "Your Name" --lang en   # 3. generates the c
 xdg-open registro/certificado-*.html             # 4. opens it (on Mac: open) → "Save as PDF" button
 ```
 
-Longer period (e.g., 90 days), without changing the daily log: `python3 medir/nivel.py --registro /tmp/n90 varrer --dias 90`, `python3 medir/nivel.py --registro /tmp/n90 relatorio --lang en`, and `python3 medir/certificado.py --nome "Your Name" --lang en --registro /tmp/n90` (Claude Code deletes logs older than 30 days unless you increase `cleanupPeriodDays`).
+Longer period (e.g., 90 days), without changing the daily log: `python3 medir/nivel.py --registro /tmp/n90 varrer --dias 90`, `python3 medir/nivel.py --registro /tmp/n90 relatorio` and `python3 medir/certificado.py --nome "Your Name" --registro /tmp/n90`. Claude Code deletes records older than 30 days unless you increase `cleanupPeriodDays`; anything already deleted cannot be recovered. If the records cover fewer days than requested, the meter will warn you in the terminal, report, and certificate.
 
 **Where the files are saved**
 
@@ -90,6 +90,8 @@ Terminal, Python 3.9 or newer (standard library only, nothing to install), and g
 `python3 tests/run.py` (46 tests with fake logs; nothing from your machine).
 
 ## Privacy
+
+**Two ways to run it.** The meter is pure Python and runs only on your machine, without internet access. **A. In the terminal**: you run the commands and open the certificate; nothing leaves your computer. **B. Ask your AI**: Claude Code or Codex runs the commands and reads the report to summarize it, and that reading goes through the provider’s server (Anthropic or OpenAI), like any other session. The report includes task names and connections (programs, agents, skills, and sites). **Confidential data (client work, NDA): use Option A.**
 
 `registro/` is excluded from git. The first request from each session is stored in a shortened form, with keys, emails, and long numbers replaced by `[oculto]`.
 

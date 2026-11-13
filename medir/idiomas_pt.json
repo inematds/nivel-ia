@@ -24,6 +24,7 @@
  "rel": {
   "titulo": "Minha escada de IA",
   "ultimos": "{data} · últimos {dias} dias",
+  "curta": "Atenção: você pediu {dias} dias, mas os registros do {fonte} só cobrem {n} dias (desde {desde}). Para o {fonte}, o resultado vale só para esse trecho. O Claude Code apaga registros com mais de 30 dias, a não ser que você aumente o cleanupPeriodDays; o que já foi apagado não volta.",
   "conduz": "A IA conduz **{pct}%** do trabalho medido (AL4 + AL5)",
   "anterior": "Na medição anterior: {ant}% ({dif} pontos).",
   "tab_escada": "Nível | O que é | Parte do tempo",
@@ -61,6 +62,7 @@
   "h1": "Certificado de nível de IA",
   "quem": "Este certificado registra que o trabalho de",
   "periodo": "nos últimos <b>{dias} dias</b> (de {ini} a <b>{fim}</b>)",
+  "curta": "Atenção: os registros do {fonte} cobrem só {n} dos {dias} dias pedidos (desde {desde}).",
   "medido": "foi medido {periodo}, a partir dos registros do Claude Code e do Codex da própria máquina{papel}: <b>{conversas}</b> conversas, <b>{sozinhas}</b> sessões que rodaram sozinhas e <b>{acoes}</b> ações da IA.",
   "papel": " e da ficha de papel",
   "big": "do trabalho medido no período foi conduzido pela IA (AL4 + AL5)",
