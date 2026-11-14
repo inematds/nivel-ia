@@ -45,6 +45,23 @@
   "sobe": "{n} runs recorded, {erros} with a major correction (limit {maxc})",
   "mantem": "{erros} major corrections in the last {n} runs (limit {maxc})"
  },
+ "plano": {
+  "decimal": ".",
+  "titulo": "Your plan to move up",
+  "intro": "The {n} tasks that have the biggest impact on your score, in order. The gain is how much the AI-assisted portion increases if the task reaches AL4.",
+  "ganho": "up to +{g} points",
+  "ganho_al5": "already counts as AI-assisted; at AL5, it no longer takes up your time",
+  "dados": "{h} h per week, {vezes} times during the period; today: {mix}.",
+  "como_perguntar": "Before doing it by hand, ask the AI how it would do it. There are no criteria: the risk is low.",
+  "como_contexto": "Today, the AI performs {apm} actions per message from you (AL3 starts at 5). Send the request with the context included (the files, an example of the result, where to save it) and let the AI carry out the steps with you.",
+  "como_inteira": "Today, the AI performs {apm} actions per message from you (AL4 starts at 15). Ask for the entire task in one message, including the completion criteria, and review it only at the end. Standing instructions in a CLAUDE.md or AGENTS.md help avoid repeating the context.",
+  "como_timer": "It already runs on its own {soz}% of the time. Put it on a timer (claude -p or codex exec), with a limit, an alert, and a way to undo it.",
+  "critica": "Critical task: the limit is AL4, always with your review before it goes out.",
+  "medir": "To find out whether it can move up, record the next {n} instances in the log (registro/papel.csv): it moves up if no more than {maxc} need major corrections.",
+  "outras": "Outside the plan: {h} h per week ({parte}% of the time) went to \"Other tasks.\" Name them in tarefas.json (request keywords → task) so each one can get its own step here.",
+  "pouco": "Low measured usage: {h} h per week with AI. The first step is to use it more: choose a task you do every week and do it with AI, working alongside it (AL3).",
+  "teto": "All measured tasks are already at the limit. Keep the log up to date to see whether the AI continues to get things right."
+ },
  "rel": {
   "titulo": "My AI ladder",
   "ultimos": "{data} · last {dias} days",

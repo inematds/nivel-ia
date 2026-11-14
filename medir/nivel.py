@@ -422,12 +422,17 @@ def montar(sessoes, papel, tarefas, dias, curta=None):
     regras = {n: c for n, c, _ in tarefas}
     sess = [s for s in sessoes if not any(b in s.get('primeiro', '').lower() for b in BASTIDORES)]
     por_nivel = collections.Counter()
-    agg = collections.defaultdict(lambda: {'min': 0.0, 'n': 0, 'niv': collections.Counter(), 'corrigi': 0, 'papel': 0})
+    agg = collections.defaultdict(lambda: {'min': 0.0, 'n': 0, 'niv': collections.Counter(), 'corrigi': 0, 'papel': 0,
+                                           'acoes': 0, 'humanos': 0, 'sozinha': 0})
     for s in sess:
         t = s.get('tarefa') or tarefa_de(s.get('primeiro', ''), tarefas)  # vinda de outra máquina: tarefa já calculada, sem o texto
         peso = s['minutos'] or 0.05
         por_nivel[s['nivel']] += peso
         agg[t]['min'] += peso; agg[t]['n'] += 1; agg[t]['niv'][s['nivel']] += peso
+        if s.get('automatica'):
+            agg[t]['sozinha'] += 1
+        else:  # ações da IA por mensagem sua, só nas conversas (é a régua do AL2/AL3/AL4)
+            agg[t]['acoes'] += s.get('acoes', 0); agg[t]['humanos'] += s.get('humanos', 0)
     for p in papel:
         por_nivel[p['nivel']] += p['minutos']
         g = agg[p['tarefa']]
@@ -451,9 +456,13 @@ def montar(sessoes, papel, tarefas, dias, curta=None):
         lista.append(dict(tarefa=nome, horas_semana=round(g['min'] / 60 / semanas, 1), vezes=g['n'], nivel=nv,
                           critica=critica, proximo=prox, papel=g['papel'], corrigi=g['corrigi'],
                           decisao=decidir(prox, linhas, nv, critica),
+                          parte=round(100 * g['min'] / total, 1),
+                          acoes_msg=round(g['acoes'] / g['humanos'], 1) if g['humanos'] else None,
+                          sozinha=round(100 * g['sozinha'] / g['n']) if g['n'] else 0,
                           mistura={k: round(v / sum(g['niv'].values()) * 100) for k, v in g['niv'].most_common()}))
     conex = registro_conexoes(sess, papel)
-    return dict(gerado_em=datetime.now().astimezone().isoformat(timespec='seconds'), dias=dias, cobertura_curta=curta or {},
+    horas_sem = round(total / 60 / semanas, 1) if por_nivel else 0
+    return dict(horas_semana=horas_sem, plano=plano(lista, horas_sem),gerado_em=datetime.now().astimezone().isoformat(timespec='seconds'), dias=dias, cobertura_curta=curta or {},
                 escada={n: round(100 * por_nivel[n] / total, 1) for n in NIVEIS},
                 parte_ia=round(100 * (por_nivel['AL4'] + por_nivel['AL5']) / total, 1),
                 tem_papel=bool(papel),
@@ -462,6 +471,40 @@ def montar(sessoes, papel, tarefas, dias, curta=None):
                             acoes=sum(s['acoes'] for s in sess), externos=sum(s['externo'] for s in sess), papel=len(papel)),
                 tarefas=lista, conexoes=conex,
                 maquinas=dict(collections.Counter(s['maquina'] for s in sess if s.get('maquina')).most_common()))
+
+
+OUTRAS = 'Outras tarefas'
+POUCO_USO_H = 1.0  # menos de 1 h por semana com a IA: o plano é começar a usar
+
+
+def plano(tarefas, horas_semana, n=3):
+    """Seu plano para subir: as n tarefas que mais mexem no número (ganho = pontos que a parte conduzida
+    pela IA sobe se a tarefa chegar ao AL4), o passo concreto pelos dados de cada uma, e o que fica fora."""
+    p = {'pouco_uso': horas_semana < POUCO_USO_H, 'horas_semana': horas_semana, 'passos': [], 'outras': None}
+    outras = next((t for t in tarefas if t['tarefa'] == OUTRAS), None)
+    if outras and outras['horas_semana'] > 0:
+        p['outras'] = {'horas_semana': outras['horas_semana'], 'parte': outras.get('parte', 0)}
+    cand = []
+    for t in tarefas:
+        if t['tarefa'] == OUTRAS or not t.get('proximo'):
+            continue
+        abaixo = sum(v for k, v in t['mistura'].items() if k in ('AL1', 'AL2', 'AL3'))
+        ganho = round(t.get('parte', 0) * abaixo / 100, 1)
+        nv, prox = t['nivel'], t['proximo']
+        if prox == 'AL3':
+            como = 'contexto'
+        elif prox == 'AL4':
+            como = 'inteira'
+        elif prox == 'AL5':
+            como = 'timer'
+        else:
+            como = 'perguntar'
+        cand.append(dict(tarefa=t['tarefa'], nivel=nv, proximo=prox, ganho=ganho, horas_semana=t['horas_semana'],
+                         vezes=t['vezes'], acoes_msg=t.get('acoes_msg'), sozinha=t.get('sozinha', 0), critica=t['critica'],
+                         como=como, mistura=dict(list(t['mistura'].items())[:2]), criterio=CRITERIO.get(prox)))
+    cand.sort(key=lambda c: (-c['ganho'], -c['horas_semana']))
+    p['passos'] = cand[:n]
+    return p
 
 
 # critério para subir AO degrau indicado: (vezes anotadas no degrau atual, máximo de correções GRANDES nessas vezes).
@@ -524,6 +567,35 @@ def registro_conexoes(sess, papel=()):
     return sorted(c.values(), key=lambda r: (-r['sessoes'], r['conexao']))
 
 
+def secao_plano(r, T, tn):
+    p = r.get('plano')
+    if not p:
+        return []
+    P = T['plano']; fmt = lambda x: str(x).replace('.', P['decimal'])
+    L = ['', '## ' + P['titulo'], '']
+    if p['pouco_uso']:
+        L += [P['pouco'].format(h=fmt(p['horas_semana'])), '']
+    if not p['passos']:
+        L += [P['teto'], '']
+    else:
+        L += [P['intro'].format(n=len(p['passos'])), '']
+    for i, c in enumerate(p['passos'], 1):
+        ganho = P['ganho'].format(g=fmt(c['ganho'])) if c['ganho'] > 0 else P['ganho_al5']
+        mix = ', '.join(f'{v}% {k}' for k, v in c['mistura'].items())
+        L += [f"### {i}. {tn(c)}: {c['nivel']} → {c['proximo']} ({ganho})", '',
+              P['dados'].format(h=fmt(c['horas_semana']), vezes=c['vezes'], mix=mix)]
+        q = dict(apm=fmt(c['acoes_msg']) if c['acoes_msg'] is not None else '0', soz=c['sozinha'])
+        L.append('- ' + P['como_' + c['como']].format(**q))
+        if c['critica']:
+            L.append('- ' + P['critica'])
+        if c['criterio']:
+            L.append('- ' + P['medir'].format(n=c['criterio'][0], maxc=c['criterio'][1]))
+        L.append('')
+    if p['outras']:
+        L += [P['outras'].format(h=fmt(p['outras']['horas_semana']), parte=fmt(p['outras']['parte'])), '']
+    return L
+
+
 def markdown(r, anterior, lang='pt'):
     T = idioma(lang); R = T['rel']; N = T['nomes']; SUB = T['o_que_subir']
     tn = lambda t: T['tarefas'].get(t['tarefa'], t['tarefa'])  # tarefa do seu tarefas.json fica como você escreveu
@@ -554,6 +626,7 @@ def markdown(r, anterior, lang='pt'):
     if alerta:
         L += ['', '## ' + R['atencao'], '']
         L += [R['atencao_linha'].format(tarefa=tn(t), pct=t['mistura']['AL5']) for t in alerta]
+    L += secao_plano(r, T, tn)
     desce = [t for t in r['tarefas'] if t['decisao']['acao'] == 'descer']
     sobe = [t for t in r['tarefas'] if t['decisao']['acao'] == 'subir']
     falta = [t for t in r['tarefas'] if t['decisao']['acao'] == 'anotar' and (t['papel'] or t['vezes'] >= 5)][:12]

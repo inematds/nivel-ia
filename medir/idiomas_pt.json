@@ -21,6 +21,23 @@
   "sobe": "{n} vezes anotadas, {erros} com correção grande (limite {maxc})",
   "mantem": "{erros} correções grandes nas últimas {n} vezes (limite {maxc})"
  },
+ "plano": {
+  "decimal": ",",
+  "titulo": "Seu plano para subir",
+  "intro": "As {n} tarefas que mais mexem no seu número, em ordem. O ganho é quanto a parte conduzida pela IA sobe se a tarefa chegar ao AL4.",
+  "ganho": "até +{g} pontos",
+  "ganho_al5": "já conta como conduzida; no AL5 sai do seu tempo",
+  "dados": "{h} h por semana, {vezes} vezes no período; hoje: {mix}.",
+  "como_perguntar": "Antes de fazer na mão, pergunte à IA como ela faria. Não há critério: o risco é baixo.",
+  "como_contexto": "Hoje a IA faz {apm} ações por mensagem sua (o AL3 começa em 5). Mande o pedido com o contexto junto (os arquivos, um exemplo do resultado, onde salvar) e deixe a IA executar os passos com você.",
+  "como_inteira": "Hoje a IA faz {apm} ações por mensagem sua (o AL4 começa em 15). Peça a tarefa inteira numa mensagem, com o critério de pronto, e só revise no fim. Instruções fixas num CLAUDE.md ou AGENTS.md evitam repetir o contexto.",
+  "como_timer": "Já roda sozinha em {soz}% das vezes. Ponha num timer (claude -p ou codex exec), com teto, alarme e um jeito de voltar atrás.",
+  "critica": "Tarefa crítica: o teto é o AL4, sempre com a sua revisão antes de sair.",
+  "medir": "Para saber se pode subir, anote na ficha (registro/papel.csv) as próximas {n} vezes: sobe se no máximo {maxc} precisarem de correção grande.",
+  "outras": "Fora do plano: {h} h por semana ({parte}% do tempo) caíram em \"Outras tarefas\". Dê nome a elas no tarefas.json (palavras do pedido → tarefa) para cada uma ganhar o seu passo aqui.",
+  "pouco": "Pouco uso medido: {h} h por semana com a IA. O primeiro passo é usar mais: escolha uma tarefa que você faz toda semana e faça com a IA, junto com ela (AL3).",
+  "teto": "Todas as tarefas medidas já estão no teto. Mantenha a ficha em dia para ver se a IA continua acertando."
+ },
  "rel": {
   "titulo": "Minha escada de IA",
   "ultimos": "{data} · últimos {dias} dias",

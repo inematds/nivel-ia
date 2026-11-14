@@ -45,6 +45,23 @@
   "sobe": "{n} veces anotadas, {erros} con corrección importante (límite {maxc})",
   "mantem": "{erros} correcciones importantes en las últimas {n} veces (límite {maxc})"
  },
+ "plano": {
+  "decimal": ",",
+  "titulo": "Tu plan para subir",
+  "intro": "Las {n} tareas que más influyen en tu número, en orden. La ganancia es cuánto aumenta la parte realizada por la IA si la tarea llega al AL4.",
+  "ganho": "hasta +{g} puntos",
+  "ganho_al5": "ya cuenta como realizada; en el AL5 deja de ocupar tu tiempo",
+  "dados": "{h} h por semana, {vezes} veces en el período; hoy: {mix}.",
+  "como_perguntar": "Antes de hacerlo a mano, pregúntale a la IA cómo lo haría. No hay criterios: el riesgo es bajo.",
+  "como_contexto": "Hoy la IA realiza {apm} acciones por mensaje tuyo (el AL3 empieza en 5). Envía la solicitud con el contexto incluido (los archivos, un ejemplo del resultado, dónde guardarlo) y deja que la IA realice los pasos contigo.",
+  "como_inteira": "Hoy la IA realiza {apm} acciones por mensaje tuyo (el AL4 empieza en 15). Pide la tarea completa en un mensaje, con el criterio para darla por terminada, y revísala solo al final. Las instrucciones fijas en un CLAUDE.md o AGENTS.md evitan que tengas que repetir el contexto.",
+  "como_timer": "Ya se ejecuta sola en el {soz}% de las ocasiones. Ponla en un temporizador (claude -p o codex exec), con un límite, una alarma y una forma de volver atrás.",
+  "critica": "Tarea crítica: el límite es el AL4, siempre con tu revisión antes de que salga.",
+  "medir": "Para saber si puede subir, anota en la ficha (registro/papel.csv) las próximas {n} veces: sube si como máximo {maxc} necesitan una corrección importante.",
+  "outras": "Fuera del plan: {h} h por semana ({parte}% del tiempo) quedaron en \"Otras tareas\". Ponles nombre en tareas.json (palabras de la solicitud → tarea) para que cada una tenga aquí su propio paso.",
+  "pouco": "Poco uso medido: {h} h por semana con la IA. El primer paso es usarla más: elige una tarea que hagas todas las semanas y hazla con la IA, junto con ella (AL3).",
+  "teto": "Todas las tareas medidas ya están en el límite. Mantén la ficha al día para ver si la IA sigue acertando."
+ },
  "rel": {
   "titulo": "Mi escalera de IA",
   "ultimos": "{data} · últimos {dias} días",

@@ -543,5 +543,24 @@ def t_aviso_periodo_curto():
         assert 'Claude Code' in md.split('\n## ')[0] and 'cleanupPeriodDays' in md, lang
 
 
+@caso
+def t_plano_para_subir():
+    """plano: tarefa com mais ganho primeiro, passo pelas ações por mensagem, "Outras tarefas" à parte, pouco uso avisado"""
+    v = [sess(1, 8, minutos=60) for _ in range(10)]  # vídeo em AL3 (8 ações por mensagem)
+    o = [sess(1, 8, minutos=30) for _ in range(4)]
+    for x in o:
+        x['primeiro'] = 'xyzzy qualquer coisa'
+    r = N.montar(v + o, [], N.TAREFAS_PADRAO, 7)
+    p = r['plano']
+    assert p['passos'][0]['tarefa'] == 'Produzir vídeos' and p['passos'][0]['proximo'] == 'AL4', p
+    assert p['passos'][0]['acoes_msg'] == 8.0 and p['passos'][0]['ganho'] > 0 and p['outras'], p
+    assert all(c['tarefa'] != 'Outras tarefas' for c in p['passos']) and not p['pouco_uso']
+    for lang, tit in (('pt', 'Seu plano para subir'), ('en', 'Your plan'), ('es', 'Tu plan')):
+        md = N.markdown(r, None, lang)
+        assert tit in md and '{' not in md.split(tit)[1].split('\n## ')[0], lang
+    pouco = N.montar([sess(1, 8, minutos=5)], [], N.TAREFAS_PADRAO, 7)
+    assert pouco['plano']['pouco_uso'] and 'Pouco uso' in N.markdown(pouco, None)
+
+
 if __name__ == '__main__':
     sys.exit(main())
