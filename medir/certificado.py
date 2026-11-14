@@ -134,7 +134,52 @@ def grafico(pontos):
             f'{grade}<polygon points="{area}" class="area"/><polyline points="{linha}" class="lin"/>{marcas}{datas}{fim}</svg>')
 
 
-def montar(rel, curva, nome, origem_curva, pouco_uso=False):
+def folha_motores(m, nome):
+    """2ª folha: o trabalho automático (motores e vigias), medido por medir/motores.py."""
+    if not m:
+        return ''
+    e = html.escape
+    nm = len(m['motores'])
+    exec_m = sum(x['rodadas'] for x in m['motores'])
+    falhas_m = sum(x['falhou'] for x in m['motores'])
+    canais = ''.join(f'<tr><td>{e(c)}</td><td class="c">{num(n)}</td></tr>' for c, n in list(m['publicados_por_canal'].items())[:8])
+    pior = sorted([x for x in m['motores'] if x['falhou']], key=lambda x: -x['falhou'])[:5]
+    falhas = ''.join(f'<tr><td>{e(x["nome"])}</td><td class="c">{x["falhou"]} de {x["rodadas"]}</td></tr>' for x in pior) or '<tr><td>nenhuma</td><td></td></tr>'
+    top = sorted(m['motores'], key=lambda x: -x['ok'])[:8]
+    tops = ''.join(f'<tr><td>{e(x["nome"])}</td><td class="c">{num(x["ok"])}</td><td class="c">{pct(x["acerto"]) if x["acerto"] is not None else "–"}</td></tr>' for x in top)
+    mi = m['minutos']
+    return f'''
+<div class="folha">
+  <div class="topo"><span><b>INEMA<span class="ponto">.</span>CLUB</b> · trabalho automático</span><span>motores · vigias · RPA</span></div>
+  <h1>Além da IA: o que roda sozinho</h1>
+  <p class="quem">Motores e robôs que trabalham sem conversa nenhuma, de</p>
+  <div class="nome">{e(nome)}</div>
+  <p class="txt">Medido nos últimos {m['dias']} dias nesta máquina: {m['timers']} rotinas agendadas no systemd, o placar dos motores e as publicações no YouTube. A escada de IA (folha 1) mede a IA conversando; esta folha mede o que entrega sem ninguém no meio.</p>
+  <div class="grade">
+    <div>
+      <div class="pjs" style="grid-template-columns:repeat(2,1fr);gap:8px">
+        <div class="pj hoje"><div class="pv" style="font-size:30px">{num(m['publicados'])}</div><div class="pl">vídeos publicados no YouTube por motores e cadeias de produção ({str(m['publicados_por_semana']).replace('.', ',')} por semana)</div></div>
+        <div class="pj"><div class="pv" style="font-size:30px">{nm}</div><div class="pl">motores de entrega + {len(m['vigias'])} vigias que cuidam da casa</div></div>
+        <div class="pj"><div class="pv" style="font-size:30px">{pct(m['acerto_motores'])}</div><div class="pl">das {num(exec_m)} execuções dos motores sem erro ({falhas_m} falhas)</div></div>
+        <div class="pj"><div class="pv" style="font-size:30px">≈ {num(m['horas_devolvidas'])} h</div><div class="pl">equivalente à mão (estimativa: {mi['video_publicado']} min por vídeo publicado, {mi['rodada_motor_ok']} min por rodada de motor)</div></div>
+      </div>
+      <h2>Publicações por canal</h2>
+      <table><tr><th>Canal</th><th class="c">Vídeos</th></tr>{canais}</table>
+    </div>
+    <div>
+      <h2 style="margin-top:0">Motores que mais rodaram</h2>
+      <table><tr><th>Motor</th><th class="c">Rodadas ok</th><th class="c">Acerto</th></tr>{tops}</table>
+      <h2>Onde mais falhou</h2>
+      <table><tr><th>Motor</th><th class="c">Falhas</th></tr>{falhas}</table>
+      <p class="nota">Vigia = roda mais de 24 vezes por dia (watchdog, fila, vigia de sessões); conta à parte para não inflar o acerto ({num(sum(v['rodadas'] for v in m['vigias']))} execuções). As horas são estimativa: os minutos ficam em registro/motores-minutos.json.</p>
+    </div>
+  </div>
+  <div class="rodape"><div class="linrod"><span>Medido por <b>nivel-ia/medir/motores.py</b> (journal do systemd, placar dos motores, histórico do yt-pubx). Só leitura.</span>
+  <span>Emitido em {data_br(m['gerado_em'][:10])} · <b>inema.club</b></span></div></div>
+</div>'''
+
+
+def montar(rel, curva, nome, origem_curva, pouco_uso=False, motores=None):
     C, NOMES, EXPLICA = T['cert'], T['nomes'], T['explica']
     tn = lambda t: T['tarefas'].get(t, t)
     e = rel['escada']
@@ -232,7 +277,7 @@ ul.esc{{list-style:none;margin:0;padding:0;font-size:12px}} ul.esc li{{margin:2p
 .avisos .nota{{margin:0 0 3px;font-size:10px}}
 .rodape b{{color:var(--tinta)}}
 .botao{{display:block;width:max-content;margin:0 auto 20px;font:600 14px Sora,sans-serif;background:var(--tinta);color:#fff;border:0;border-radius:10px;padding:10px 18px;cursor:pointer}}
-@media print{{html,body{{background:none;margin:0;height:100%;overflow:hidden}} .folha{{margin:0;box-shadow:none;width:100%;height:100vh;max-height:100%;break-inside:avoid;page-break-after:avoid;display:flex;flex-direction:column}} .nome{{align-self:flex-start}} .rodape{{position:static;margin-top:auto;padding:3mm 0 8mm}} .botao{{display:none}}}}
+@media print{{html,body{{background:none;margin:0}} .folha+.folha{{break-before:page}} .folha{{margin:0;box-shadow:none;width:100%;height:100vh;max-height:100%;break-inside:avoid;page-break-after:avoid;display:flex;flex-direction:column}} .nome{{align-self:flex-start}} .rodape{{position:static;margin-top:auto;padding:3mm 0 8mm}} .botao{{display:none}}}}
 @media screen and (max-width:1150px){{.folha{{width:auto;height:auto;margin:8px;padding-bottom:8mm}} .grade{{grid-template-columns:1fr}} .rodape{{position:static;margin-top:8mm}} .linrod{{flex-direction:column}}}}
 </style></head><body>
 <div class="folha">
@@ -261,6 +306,7 @@ ul.esc{{list-style:none;margin:0;padding:0;font-size:12px}} ul.esc li{{margin:2p
     <span>{C['emitido'].format(data=data_br(hoje))} · <b>inema.club</b></span></div>
   </div>
 </div>
+{folha_motores(motores, nome)}
 <button class="botao" onclick="window.print()">{C['botao']}</button>
 </body></html>
 '''
@@ -271,6 +317,7 @@ def main():
     ap.add_argument('--nome', required=True, help='nome que aparece no certificado')
     ap.add_argument('--registro', default=REG, help='pasta do registro (a mesma do --registro do nivel.py)')
     ap.add_argument('--saida')
+    ap.add_argument('--motores', action='store_true', help='acrescenta a 2ª folha: trabalho automático (rode antes medir/motores.py)')
     ap.add_argument('--lang', choices=IDIOMAS, default='pt', help='idioma do certificado (pt, en, es)')
     ap.add_argument('--geral', action='store_true', help='certificado geral: todas as máquinas juntadas (rode antes  nivel.py relatorio --geral)')
     a = ap.parse_args()
@@ -295,7 +342,7 @@ def main():
         curva, origem = historico(os.path.join(a.registro, f'historico{suf}.jsonl')), 'medicoes'
     hoje = rel['gerado_em'][:10]
     saida = a.saida or os.path.join(a.registro, f'certificado{suf}-{hoje}{'' if LANG == 'pt' else '-' + LANG}.html')
-    open(saida, 'w', encoding='utf-8').write(montar(rel, curva, a.nome, origem, pouco))
+    open(saida, 'w', encoding='utf-8').write(montar(rel, curva, a.nome, origem, pouco, motores=json.load(open(os.path.join(a.registro, 'motores.json'), encoding='utf-8')) if a.motores else None))
     print(T['cert']['saida'].format(arq=os.path.abspath(saida)))
     if not a.geral and os.path.exists(os.path.join(a.registro, 'sessoes.json')):
         # o arquivo para somar vai separado do certificado: medicao-<máquina>-<data>.json, sem o texto dos pedidos
