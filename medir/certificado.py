@@ -228,7 +228,7 @@ ul.esc{{list-style:none;margin:0;padding:0;font-size:12px}} ul.esc li{{margin:2p
 .avisos .nota{{margin:0 0 3px;font-size:10px}}
 .rodape b{{color:var(--tinta)}}
 .botao{{display:block;width:max-content;margin:0 auto 20px;font:600 14px Sora,sans-serif;background:var(--tinta);color:#fff;border:0;border-radius:10px;padding:10px 18px;cursor:pointer}}
-@media print{{body{{background:none}} .folha{{margin:0;box-shadow:none}} .botao{{display:none}}}}
+@media print{{html,body{{background:none;margin:0;height:100%;overflow:hidden}} .folha{{margin:0;box-shadow:none;width:100%;height:100vh;max-height:100%;break-inside:avoid;page-break-after:avoid;display:flex;flex-direction:column}} .nome{{align-self:flex-start}} .rodape{{position:static;margin-top:auto;padding:3mm 0 8mm}} .botao{{display:none}}}}
 @media screen and (max-width:1150px){{.folha{{width:auto;height:auto;margin:8px;padding-bottom:8mm}} .grade{{grid-template-columns:1fr}} .rodape{{position:static;margin-top:8mm}} .linrod{{flex-direction:column}}}}
 </style></head><body>
 <div class="folha">
