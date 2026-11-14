@@ -143,28 +143,33 @@ def folha_motores(m, nome):
     exec_m = sum(x['rodadas'] for x in m['motores'])
     falhas_m = sum(x['falhou'] for x in m['motores'])
     canais = ''.join(f'<tr><td>{e(c)}</td><td class="c">{num(n)}</td></tr>' for c, n in list(m['publicados_por_canal'].items())[:8])
-    pior = sorted([x for x in m['motores'] if x['falhou']], key=lambda x: -x['falhou'])[:5]
+    pior = sorted([x for x in m['motores'] + m['vigias'] if x['falhou']], key=lambda x: -x['falhou'] / max(1, x['rodadas']))[:5]
     falhas = ''.join(f'<tr><td>{e(x["nome"])}</td><td class="c">{x["falhou"]} de {x["rodadas"]}</td></tr>' for x in pior) or '<tr><td>nenhuma</td><td></td></tr>'
     top = sorted(m['motores'], key=lambda x: -x['ok'])[:8]
     tops = ''.join(f'<tr><td>{e(x["nome"])}</td><td class="c">{num(x["ok"])}</td><td class="c">{pct(x["acerto"]) if x["acerto"] is not None else "–"}</td></tr>' for x in top)
     mi = m['minutos']
+    if m.get('maquinas'):
+        lin = ''.join(f'<tr><td>{e(q["maquina"])}</td><td class="c">{q["motores"]}</td><td class="c">{q["ligados"]}</td><td class="c">{num(q["execucoes"] + q["cron"]["rodadas"])}</td><td class="c">{num(q["publicados"])}</td></tr>' for q in m['maquinas'])
+        maquinas_html = ('<h2>Por máquina</h2><table><tr><th>Máquina</th><th class="c">Motores</th><th class="c">Ligados</th>'
+                         f'<th class="c">Execuções</th><th class="c">Vídeos</th></tr>{lin}</table>')
+    else:
+        maquinas_html = f'<h2>Publicações por canal</h2><table><tr><th>Canal</th><th class="c">Vídeos</th></tr>{canais}</table>'
     return f'''
 <div class="folha">
   <div class="topo"><span><b>INEMA<span class="ponto">.</span>CLUB</b> · trabalho automático</span><span>motores · vigias · RPA</span></div>
   <h1>Além da IA: o que roda sozinho</h1>
   <p class="quem">Motores e robôs que trabalham sem conversa nenhuma, de</p>
   <div class="nome">{e(nome)}</div>
-  <p class="txt">Medido nos últimos {m['dias']} dias nesta máquina: {m['timers']} rotinas agendadas no systemd, o placar dos motores e as publicações no YouTube. A escada de IA (folha 1) mede a IA conversando; esta folha mede o que entrega sem ninguém no meio.</p>
+  <p class="txt">Medido nos últimos {m['dias']} dias {('em ' + str(len(m['maquinas'])) + ' máquinas (esta + VPS)') if m.get('maquinas') else 'nesta máquina'}: {m['timers']} rotinas agendadas no systemd, o cron, os serviços sempre ligados, o placar dos motores e as publicações no YouTube. A escada de IA (folha 1) mede a IA conversando; esta folha mede o que entrega sem ninguém no meio.</p>
   <div class="grade">
     <div>
       <div class="pjs" style="grid-template-columns:repeat(2,1fr);gap:8px">
         <div class="pj hoje"><div class="pv" style="font-size:30px">{num(m['publicados'])}</div><div class="pl">vídeos publicados no YouTube por motores e cadeias de produção ({str(m['publicados_por_semana']).replace('.', ',')} por semana)</div></div>
-        <div class="pj"><div class="pv" style="font-size:30px">{nm}</div><div class="pl">motores de entrega + {len(m['vigias'])} vigias que cuidam da casa</div></div>
+        <div class="pj"><div class="pv" style="font-size:30px">{nm}</div><div class="pl">motores de entrega + {len(m['vigias'])} vigias + {num(m.get('ligados', {}).get('total', 0))} serviços sempre ligados (bots, sites, Docker){' · cron: ' + num(m['cron']['rodadas']) + ' execuções' if m.get('cron', {}).get('rodadas') else ''}</div></div>
         <div class="pj"><div class="pv" style="font-size:30px">{pct(m['acerto_motores'])}</div><div class="pl">das {num(exec_m)} execuções dos motores sem erro ({falhas_m} falhas)</div></div>
         <div class="pj"><div class="pv" style="font-size:30px">≈ {num(m['horas_devolvidas'])} h</div><div class="pl">equivalente à mão (estimativa: {mi['video_publicado']} min por vídeo publicado, {mi['rodada_motor_ok']} min por rodada de motor)</div></div>
       </div>
-      <h2>Publicações por canal</h2>
-      <table><tr><th>Canal</th><th class="c">Vídeos</th></tr>{canais}</table>
+      {maquinas_html}
     </div>
     <div>
       <h2 style="margin-top:0">Motores que mais rodaram</h2>
@@ -342,7 +347,7 @@ def main():
         curva, origem = historico(os.path.join(a.registro, f'historico{suf}.jsonl')), 'medicoes'
     hoje = rel['gerado_em'][:10]
     saida = a.saida or os.path.join(a.registro, f'certificado{suf}-{hoje}{'' if LANG == 'pt' else '-' + LANG}.html')
-    open(saida, 'w', encoding='utf-8').write(montar(rel, curva, a.nome, origem, pouco, motores=json.load(open(os.path.join(a.registro, 'motores.json'), encoding='utf-8')) if a.motores else None))
+    open(saida, 'w', encoding='utf-8').write(montar(rel, curva, a.nome, origem, pouco, motores=json.load(open(os.path.join(a.registro, 'motores-geral.json' if a.geral else 'motores.json'), encoding='utf-8')) if a.motores else None))
     print(T['cert']['saida'].format(arq=os.path.abspath(saida)))
     if not a.geral and os.path.exists(os.path.join(a.registro, 'sessoes.json')):
         # o arquivo para somar vai separado do certificado: medicao-<máquina>-<data>.json, sem o texto dos pedidos
