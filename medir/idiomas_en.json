@@ -39,7 +39,7 @@
   "grandes_ult": "{grandes} major corrections in the last {n} runs",
   "teto": "at this task's limit",
   "al2_sem_criterio": "there is no threshold for starting to ask AI",
-  "anote_proximas": "record the next {n} runs on the sheet: record {n} more",
+  "anote_proximas": "record the next {n} runs on the sheet to measure whether the AI gets it right",
   "anotadas_falta": "{feitas} of {n} runs recorded: record {falta} more",
   "grave_janela": "there was a serious error in the last {n} runs",
   "sobe": "{n} runs recorded, {erros} with a major correction (limit {maxc})",

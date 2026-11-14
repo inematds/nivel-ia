@@ -15,7 +15,7 @@
   "grandes_ult": "{grandes} correções grandes nas últimas {n} vezes",
   "teto": "no teto desta tarefa",
   "al2_sem_criterio": "para começar a perguntar à IA não há critério",
-  "anote_proximas": "anote na ficha as próximas {n} vezes: anote mais {n}",
+  "anote_proximas": "anote na ficha as próximas {n} vezes para medir se a IA acerta",
   "anotadas_falta": "{feitas} de {n} vezes anotadas: anote mais {falta}",
   "grave_janela": "houve erro grave nas últimas {n} vezes",
   "sobe": "{n} vezes anotadas, {erros} com correção grande (limite {maxc})",

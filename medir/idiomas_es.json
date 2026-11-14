@@ -39,7 +39,7 @@
   "grandes_ult": "{grandes} correcciones importantes en las últimas {n} veces",
   "teto": "en el límite de esta tarea",
   "al2_sem_criterio": "para empezar a preguntarle a la IA no hay criterio",
-  "anote_proximas": "anota en la ficha las próximas {n} veces: anota {n} más",
+  "anote_proximas": "anota en la ficha las próximas {n} veces para medir si la IA acierta",
   "anotadas_falta": "{feitas} de {n} veces anotadas: anota {falta} más",
   "grave_janela": "hubo un error grave en las últimas {n} veces",
   "sobe": "{n} veces anotadas, {erros} con corrección importante (límite {maxc})",
