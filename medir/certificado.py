@@ -17,6 +17,9 @@ Uso:
 """
 import argparse, datetime as dt, html, json, math, os, sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import nivel  # noqa: E402  (sessões de uma ou de várias máquinas, arquivo para somar)
+
 AQUI = os.path.dirname(os.path.abspath(__file__))
 REG = os.path.join(AQUI, '..', 'registro')
 IDIOMAS = ('pt', 'en', 'es')
@@ -57,14 +60,8 @@ def pct(x):
     return f'{x:.1f}'.replace('.', T['cert']['decimal']) + '%'
 
 
-def semanas(caminho, minimo=MIN_HORAS_SEMANA):
+def semanas(ss, minimo=MIN_HORAS_SEMANA):
     """% conduzido pela IA (AL4+AL5) por semana, com o mesmo peso do relatório (minutos, mínimo 0,05)."""
-    if not os.path.exists(caminho):
-        return []
-    try:
-        ss = json.load(open(caminho, encoding='utf-8'))['sessoes']
-    except (ValueError, KeyError):
-        return []
     soma = {}
     for s in ss:
         if not s.get('inicio'):
@@ -182,7 +179,14 @@ def montar(rel, curva, nome, origem_curva, pouco_uso=False):
     fontes_nome = {'claude': 'Claude Code', 'codex': 'Codex'}
     curta = ''.join(f'<p class="nota aviso">{C["curta"].format(fonte=fontes_nome.get(k, k), n=c["dias"], dias=rel.get("dias", 30), desde=data_br(c["desde"]))}</p>'
                     for k, c in rel.get('cobertura_curta', {}).items())
-    medido = C['medido'].format(periodo=periodo, papel=papel, conversas=num(f.get('conversas', 0)),
+    mq = rel.get('maquinas') or {}
+    if len(mq) > 1:
+        onde = C['onde_varias'].format(n=len(mq), lista=', '.join(html.escape(m) for m in mq))
+    elif mq:
+        onde = C['onde_uma'].format(m=html.escape(next(iter(mq))))
+    else:
+        onde = C['onde_padrao']
+    medido = C['medido'].format(periodo=periodo, papel=papel, onde=onde, conversas=num(f.get('conversas', 0)),
                                 sozinhas=num(f.get('sozinhas', 0)), acoes=num(f.get('acoes', 0)))
     return f'''<!doctype html>
 <html lang="{C['html_lang']}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -268,23 +272,33 @@ def main():
     ap.add_argument('--registro', default=REG, help='pasta do registro (a mesma do --registro do nivel.py)')
     ap.add_argument('--saida')
     ap.add_argument('--lang', choices=IDIOMAS, default='pt', help='idioma do certificado (pt, en, es)')
+    ap.add_argument('--geral', action='store_true', help='certificado geral: todas as máquinas juntadas (rode antes  nivel.py relatorio --geral)')
     a = ap.parse_args()
     usar_idioma(a.lang)
-    arq = os.path.join(a.registro, 'relatorio.json')
+    suf = '-geral' if a.geral else ''
+    arq = os.path.join(a.registro, f'relatorio{suf}.json')
     if not os.path.exists(arq):
         sys.exit(T['cert']['falta_rel'])
     rel = json.load(open(arq, encoding='utf-8'))
-    curva, origem, pouco = semanas(os.path.join(a.registro, 'sessoes.json')), 'semanas', False
+    try:
+        ss = nivel.todas_sessoes(a.registro, a.geral)[0]
+    except (ValueError, KeyError, OSError):
+        ss = []
+    curva, origem, pouco = semanas(ss), 'semanas', False
     if len(curva) < 2:  # pouco uso: o gráfico sai do mesmo jeito, com semanas menores e aviso
-        menor = semanas(os.path.join(a.registro, 'sessoes.json'), MIN_POUCO_USO)
+        menor = semanas(ss, MIN_POUCO_USO)
         if len(menor) >= 2:
             curva, pouco = menor, True
     if len(curva) < 2:
-        curva, origem = historico(os.path.join(a.registro, 'historico.jsonl')), 'medicoes'
+        curva, origem = historico(os.path.join(a.registro, f'historico{suf}.jsonl')), 'medicoes'
     hoje = rel['gerado_em'][:10]
-    saida = a.saida or os.path.join(a.registro, f'certificado-{hoje}{'' if LANG == 'pt' else '-' + LANG}.html')
+    saida = a.saida or os.path.join(a.registro, f'certificado{suf}-{hoje}{'' if LANG == 'pt' else '-' + LANG}.html')
     open(saida, 'w', encoding='utf-8').write(montar(rel, curva, a.nome, origem, pouco))
     print(T['cert']['saida'].format(arq=os.path.abspath(saida)))
+    if not a.geral and os.path.exists(os.path.join(a.registro, 'sessoes.json')):
+        # o arquivo para somar vai separado do certificado: medicao-<máquina>-<data>.json, sem o texto dos pedidos
+        med = nivel.exportar_medicao(a.registro, pasta=os.path.dirname(os.path.abspath(saida)))
+        print(T['cert']['saida_medicao'].format(arq=os.path.abspath(med)))
 
 
 if __name__ == '__main__':

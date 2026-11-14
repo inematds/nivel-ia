@@ -27,7 +27,10 @@ import json
 import os
 import re
 import signal
+import socket
+import subprocess
 import sys
+import tempfile
 import time
 from datetime import date, datetime, timezone
 from multiprocessing import Pool
@@ -417,11 +420,11 @@ def cobertura(sessoes, dias, agora):
 
 def montar(sessoes, papel, tarefas, dias, curta=None):
     regras = {n: c for n, c, _ in tarefas}
-    sess = [s for s in sessoes if not any(b in s['primeiro'].lower() for b in BASTIDORES)]
+    sess = [s for s in sessoes if not any(b in s.get('primeiro', '').lower() for b in BASTIDORES)]
     por_nivel = collections.Counter()
     agg = collections.defaultdict(lambda: {'min': 0.0, 'n': 0, 'niv': collections.Counter(), 'corrigi': 0, 'papel': 0})
     for s in sess:
-        t = tarefa_de(s['primeiro'], tarefas)
+        t = s.get('tarefa') or tarefa_de(s.get('primeiro', ''), tarefas)  # vinda de outra máquina: tarefa já calculada, sem o texto
         peso = s['minutos'] or 0.05
         por_nivel[s['nivel']] += peso
         agg[t]['min'] += peso; agg[t]['n'] += 1; agg[t]['niv'][s['nivel']] += peso
@@ -457,7 +460,8 @@ def montar(sessoes, papel, tarefas, dias, curta=None):
                 fontes=dict(claude=sum(s['fonte'] == 'claude' for s in sess), codex=sum(s['fonte'] == 'codex' for s in sess),
                             conversas=sum(not s['automatica'] for s in sess), sozinhas=sum(s['automatica'] for s in sess),
                             acoes=sum(s['acoes'] for s in sess), externos=sum(s['externo'] for s in sess), papel=len(papel)),
-                tarefas=lista, conexoes=conex)
+                tarefas=lista, conexoes=conex,
+                maquinas=dict(collections.Counter(s['maquina'] for s in sess if s.get('maquina')).most_common()))
 
 
 # critério para subir AO degrau indicado: (vezes anotadas no degrau atual, máximo de correções GRANDES nessas vezes).
@@ -579,6 +583,182 @@ def markdown(r, anterior, lang='pt'):
 
 
 # ---------------------------------------------------------------- comandos
+# ---------------------------------------------------------------- várias máquinas
+FORMATO = 'nivel-ia.maquinas/1'
+CAMPOS_JUNTAR = ('fonte', 'arquivo', 'inicio', 'minutos', 'nivel', 'humanos', 'acoes', 'externo', 'automatica', 'conexoes', 'tarefa', 'maquina')
+
+
+def maquina_local():
+    return os.environ.get('NIVEL_MAQUINA') or socket.gethostname() or 'esta-maquina'
+
+
+def nome_arquivo(nome):
+    return re.sub(r'[^\w.-]+', '-', nome).strip('-.') or 'maquina'
+
+
+def sem_texto(sessoes, maquina, tarefas=None):
+    """o que viaja entre máquinas: números, conexões e a tarefa já calculada. Sem o texto do pedido e sem a pasta."""
+    tarefas = tarefas or carregar_tarefas()
+    out = []
+    for s in sessoes:
+        if any(b in s.get('primeiro', '').lower() for b in BASTIDORES):
+            continue
+        x = {k: s[k] for k in CAMPOS_JUNTAR if k in s}
+        x['tarefa'] = s.get('tarefa') or tarefa_de(s.get('primeiro', ''), tarefas)
+        x['maquina'] = s.get('maquina') or maquina
+        out.append(x)
+    return out
+
+
+def ler_local(registro):
+    arq = Path(registro) / 'sessoes.json'
+    if not arq.exists():
+        return None
+    d = json.loads(arq.read_text(encoding='utf-8'))
+    m = d.get('maquina') or maquina_local()
+    for s in d['sessoes']:
+        s.setdefault('maquina', m)
+    return d
+
+
+def todas_sessoes(registro, geral=True):
+    """sessões desta máquina (+ as juntadas em registro/maquinas/*.json, se geral), sem contar duas vezes a mesma conversa."""
+    registro = Path(registro)
+    local = ler_local(registro)
+    sessoes, vistos = [], set()
+    dias = local.get('dias', 30) if local else 0
+    gerado = local.get('gerado_em') if local else None
+    fontes = [local] if local else []
+    for f in sorted((registro / 'maquinas').glob('*.json')) if geral else []:
+        try:
+            fontes.append(json.loads(f.read_text(encoding='utf-8')))
+        except ValueError:
+            print(f'Aviso: {f} ilegível, ficou de fora', file=sys.stderr)
+    for d in fontes:
+        dias = max(dias, d.get('dias', 0))
+        for s in d['sessoes']:
+            k = (s.get('fonte'), s.get('arquivo'), round(s.get('inicio') or 0))
+            if s.get('arquivo'):  # sem nome de arquivo (ficha, teste) não há como saber se é a mesma conversa
+                if k in vistos:
+                    continue
+                vistos.add(k)
+            sessoes.append(s)
+    return sessoes, dias or 30, gerado
+
+
+def exportar_medicao(registro, saida=None, pasta=None):
+    """arquivo para somar em outra máquina: só desta máquina, sem o texto dos pedidos e sem as pastas."""
+    local = ler_local(registro)
+    if not local:
+        raise ValueError('Ainda não há medição: rode  python3 medir/nivel.py varrer')
+    m = local.get('maquina') or maquina_local()
+    dados = {'formato': FORMATO, 'maquina': m, 'gerado_em': local.get('gerado_em'), 'dias': local.get('dias', 30),
+             'sessoes': sem_texto(local['sessoes'], m)}
+    saida = Path(saida) if saida else Path(pasta or registro) / f'medicao-{nome_arquivo(m)}-{date.today().isoformat()}.json'
+    saida.write_text(json.dumps(dados, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+    return saida
+
+
+def ler_fonte(caminho, nome=None):
+    """aceita: medicao-*.json (o arquivo para somar), sessoes.json, ou uma pasta (o kit ou o registro) que tenha um deles."""
+    p = Path(caminho).expanduser()
+    if p.is_dir():
+        base = [p, p / 'registro']
+        cands = [x for b in base for x in sorted(b.glob('medicao-*.json'), reverse=True)] + [b / 'sessoes.json' for b in base]
+        achou = next((c for c in cands if c.exists()), None)
+        if not achou:
+            raise ValueError(f'{p}: não achei medicao-*.json nem sessoes.json')
+        p = achou
+    d = json.loads(p.read_text(encoding='utf-8'))
+    if d.get('formato') == FORMATO:
+        return sem_texto(d['sessoes'], nome or d.get('maquina') or 'maquina'), d.get('dias', 30)
+    if 'sessoes' in d:
+        return sem_texto(d['sessoes'], nome or d.get('maquina') or nome_arquivo(p.resolve().parent.parent.name or p.stem)), d.get('dias', 30)
+    raise ValueError(f'{p}: formato desconhecido')
+
+
+def buscar_remoto(alvo, tmp, chave=None):
+    """usuario@host:/caminho → cópia local por scp (só leitura do lado de lá)."""
+    destino = Path(tmp) / nome_arquivo(alvo)
+    cmd = ['scp', '-q', '-r', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15']
+    if chave:
+        cmd += ['-i', str(Path(chave).expanduser())]
+    r = subprocess.run(cmd + [alvo, str(destino)], capture_output=True, text=True)
+    if r.returncode != 0:
+        raise ValueError(f'{alvo}: scp falhou ({r.stderr.strip() or r.returncode})')
+    return destino
+
+
+def cmd_juntar(a):
+    destino = a.registro / 'maquinas'
+    destino.mkdir(parents=True, exist_ok=True)
+    local = maquina_local()
+    erros = 0
+    with tempfile.TemporaryDirectory() as tmp:
+        for alvo in a.fontes:
+            try:
+                remoto = re.match(r'^[\w.@-]+:', alvo) and not Path(alvo).exists()
+                caminho = buscar_remoto(alvo, tmp, a.chave) if remoto else alvo
+                if remoto and Path(caminho).is_dir() and (Path(caminho) / 'registro').is_dir():
+                    caminho = Path(caminho) / 'registro'
+                nome = a.nome if len(a.fontes) == 1 else None
+                if remoto and not nome:
+                    nome = alvo.split(':', 1)[0].split('@')[-1]
+                ss, dias = ler_fonte(caminho, nome)
+            except (ValueError, OSError) as e:
+                print('Falhou:', e, file=sys.stderr)
+                erros += 1
+                continue
+            if a.nome and len(a.fontes) == 1:
+                for s in ss:
+                    s['maquina'] = a.nome
+            por = collections.defaultdict(list)
+            for s in ss:
+                por[s['maquina']].append(s)
+            for m, lista in por.items():
+                if m == local and not a.nome:
+                    print(f'  {m}: é esta máquina, já entra pelo registro local (pulei {len(lista)} sessões)')
+                    continue
+                arq = destino / (nome_arquivo(m) + '.json')
+                velho = json.loads(arq.read_text(encoding='utf-8')) if arq.exists() else {'sessoes': [], 'dias': 0}
+                chaves = {(s.get('fonte'), s.get('arquivo'), round(s.get('inicio') or 0)) for s in lista}
+                manter = [s for s in velho['sessoes'] if (s.get('fonte'), s.get('arquivo'), round(s.get('inicio') or 0)) not in chaves]
+                arq.write_text(json.dumps({'maquina': m, 'dias': max(dias, velho.get('dias', 0)),
+                                           'juntado_em': datetime.now(timezone.utc).isoformat(timespec='seconds'),
+                                           'sessoes': manter + lista}, ensure_ascii=False), encoding='utf-8')
+                print(f'  {m}: {len(lista)} sessões → {arq}')
+    ss, _, _ = todas_sessoes(a.registro)
+    n = collections.Counter(s.get('maquina') or local for s in ss)
+    print(f"Total: {len(ss)} sessões em {len(n)} máquina(s): " + ', '.join(f'{m} ({c})' for m, c in n.most_common()))
+    print('Agora: python3 medir/nivel.py relatorio --geral  e  python3 medir/certificado.py --nome "Seu Nome" --geral')
+    return 1 if erros else 0
+
+
+def cmd_maquinas(a):
+    ss, _, _ = todas_sessoes(a.registro)
+    local = maquina_local()
+    n = collections.Counter(s.get('maquina') or local for s in ss)
+    for m, c in n.most_common():
+        onde = 'registro/sessoes.json' if m == local else f'registro/maquinas/{nome_arquivo(m)}.json'
+        print(f'{m}: {c} sessões  ({onde})')
+    if a.tirar:
+        arq = a.registro / 'maquinas' / (nome_arquivo(a.tirar) + '.json')
+        if not arq.exists():
+            print(f'{a.tirar}: não está em registro/maquinas/', file=sys.stderr)
+            return 1
+        arq.unlink()
+        print(f'{a.tirar}: tirada (apaguei {arq})')
+    return 0
+
+
+def cmd_exportar(a):
+    try:
+        arq = exportar_medicao(a.registro, a.saida)
+    except ValueError as e:
+        sys.exit(str(e))
+    print(f'medição para somar: {arq}  (sem o texto dos pedidos; leve junto com o certificado)')
+
+
 def cmd_varrer(a):
     corte = time.time() - a.dias * 86400
     itens = [('claude', c) for c in glob.glob(str(Path(a.claude).expanduser() / '*/*.jsonl')) if os.path.getmtime(c) >= corte]
@@ -588,7 +768,8 @@ def cmd_varrer(a):
         sessoes = [s for s in pool.imap_unordered(ler, itens, chunksize=16) if s and s['inicio'] >= corte]
     a.registro.mkdir(parents=True, exist_ok=True)
     tmp = a.registro / 'sessoes.json.tmp'
-    tmp.write_text(json.dumps(dict(gerado_em=datetime.now(timezone.utc).isoformat(timespec='seconds'), dias=a.dias, sessoes=sessoes),
+    tmp.write_text(json.dumps(dict(gerado_em=datetime.now(timezone.utc).isoformat(timespec='seconds'), dias=a.dias,
+                                   maquina=a.maquina or maquina_local(), sessoes=sessoes),
                               ensure_ascii=False), encoding='utf-8')
     tmp.replace(a.registro / 'sessoes.json')
     n = collections.Counter(s['fonte'] for s in sessoes)
@@ -599,9 +780,9 @@ def cmd_varrer(a):
 
 
 def carregar(a):
-    arq = a.registro / 'sessoes.json'
-    if arq.exists():
-        d = json.loads(arq.read_text(encoding='utf-8'))
+    ss, dias, gerado = todas_sessoes(a.registro, getattr(a, 'geral', False))
+    if ss or (a.registro / 'sessoes.json').exists():
+        d = {'sessoes': ss, 'dias': dias, 'gerado_em': gerado}
     elif (a.registro / 'papel.csv').exists():  # só a ficha (ChatGPT no navegador etc.): relatório sem logs
         d = {'sessoes': [], 'dias': 30}
     else:
@@ -611,22 +792,23 @@ def carregar(a):
         print('Aviso na ficha de papel,', e, file=sys.stderr)
     try:
         agora = datetime.fromisoformat(d['gerado_em']).timestamp()
-    except (KeyError, ValueError):
+    except (KeyError, ValueError, TypeError):  # geral só com máquinas juntadas: sem data local
         agora = time.time()
     return montar(d['sessoes'], papel, carregar_tarefas(), d['dias'], cobertura(d['sessoes'], d['dias'], agora))
 
 
 def cmd_relatorio(a):
     r = carregar(a)
-    hist_arq = a.registro / 'historico.jsonl'
+    suf = '-geral' if a.geral else ''  # geral = todas as máquinas juntadas; sem --geral = só esta máquina
+    hist_arq = a.registro / f'historico{suf}.jsonl'
     hist = [json.loads(l) for l in hist_arq.read_text(encoding='utf-8').splitlines() if l.strip()] if hist_arq.exists() else []
     hoje = date.today().isoformat()
     anterior = next((h['parte_ia'] for h in reversed(hist) if h.get('data') != hoje), None)
     hist = [h for h in hist if h.get('data') != hoje] + [{'data': hoje, 'parte_ia': r['parte_ia'], 'escada': r['escada']}]
     hist_arq.write_text(''.join(json.dumps(h, ensure_ascii=False) + '\n' for h in hist[-400:]), encoding='utf-8')
-    (a.registro / 'relatorio.json').write_text(json.dumps(r, ensure_ascii=False, indent=1), encoding='utf-8')
+    (a.registro / f'relatorio{suf}.json').write_text(json.dumps(r, ensure_ascii=False, indent=1), encoding='utf-8')
     md = markdown(r, anterior, a.lang)
-    (a.registro / 'relatorio.md').write_text(md, encoding='utf-8')
+    (a.registro / f'relatorio{suf}.md').write_text(md, encoding='utf-8')
     print(json.dumps(r, ensure_ascii=False, indent=1) if a.json else md)
 
 
@@ -657,13 +839,24 @@ def main(argv=None):
     v.add_argument('--dias', type=int, default=30)
     v.add_argument('--claude', default='~/.claude/projects')
     v.add_argument('--codex', action='append', help='pasta de sessões do Codex (repita para mais de uma)')
+    v.add_argument('--maquina', help='nome desta máquina no relatório (padrão: o hostname)')
+    j = sub.add_parser('juntar', help='junta a medição de outras máquinas (certificado, sessoes.json, pasta ou usuario@host:caminho)')
+    j.add_argument('fontes', nargs='+')
+    j.add_argument('--nome', help='nome da máquina (só com uma fonte)')
+    j.add_argument('--chave', help='chave SSH para usuario@host:caminho')
+    mq = sub.add_parser('maquinas', help='lista as máquinas juntadas')
+    mq.add_argument('--tirar', help='tira uma máquina juntada')
     r = sub.add_parser('relatorio')
     r.add_argument('--json', action='store_true')
     r.add_argument('--lang', choices=IDIOMAS, default='pt', help='idioma do relatório (pt, en, es)')
+    r.add_argument('--geral', action='store_true', help='todas as máquinas juntadas (relatorio-geral.md)')
+    e = sub.add_parser('exportar', help='grava medicao-<máquina>-<data>.json, o arquivo para somar em outra máquina')
+    e.add_argument('--saida')
     sub.add_parser('conexoes')
     sub.add_parser('papel')
     a = p.parse_args(argv)
-    return {'varrer': cmd_varrer, 'relatorio': cmd_relatorio, 'conexoes': cmd_conexoes, 'papel': cmd_papel}[a.cmd](a) or 0
+    return {'varrer': cmd_varrer, 'relatorio': cmd_relatorio, 'conexoes': cmd_conexoes, 'papel': cmd_papel,
+            'juntar': cmd_juntar, 'maquinas': cmd_maquinas, 'exportar': cmd_exportar}[a.cmd](a) or 0
 
 
 if __name__ == '__main__':

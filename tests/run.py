@@ -448,6 +448,47 @@ def t_certificado_pouco_uso_tem_grafico_e_aviso_no_rodape():
 
 
 @caso
+def t_juntar_maquinas_certificado_geral():
+    """cada máquina: certificado + medicao-*.json sem texto; juntar soma sem duplicar; --geral sai com N máquinas"""
+    import subprocess
+    py = sys.executable
+    med = RAIZ / 'medir'
+    with tempfile.TemporaryDirectory() as d:
+        regs = []
+        for i, nome in enumerate(('vps-a', 'vps-b')):
+            reg = Path(d, nome)
+            reg.mkdir()
+            ss = []
+            for k in range(3):
+                s = sess(2, 20)
+                s.update(fonte='claude', arquivo=f'{nome}-{k}.jsonl', inicio=N.epoch('2026-11-10T10:00:00Z') + k * 3600,
+                         primeiro='segredo do cliente sobre vídeo', pasta='/home/x/cliente', minutos=30)
+                ss.append(s)
+            (reg / 'sessoes.json').write_text(json.dumps({'dias': 30, 'maquina': nome, 'gerado_em': '2026-11-13T00:00:00+00:00', 'sessoes': ss}))
+            for cmd in (['nivel.py', '--registro', str(reg), 'relatorio'], ['certificado.py', '--nome', 'Ana', '--registro', str(reg)]):
+                r = subprocess.run([py, str(med / cmd[0])] + cmd[1:], capture_output=True, text=True)
+                assert r.returncode == 0, r.stderr
+            arqs = list(reg.glob('medicao-*.json'))
+            assert len(arqs) == 1 and arqs[0].name.startswith(f'medicao-{nome}-'), arqs
+            txt = arqs[0].read_text()
+            assert 'segredo' not in txt and '/home/x' not in txt and 'Produzir vídeos' in txt  # sem texto, com a tarefa
+            assert f'da máquina <b>{nome}</b>' in next(reg.glob('certificado-*.html')).read_text()
+            regs.append(arqs[0])
+        geral = Path(d, 'geral')
+        r = subprocess.run([py, str(med / 'nivel.py'), '--registro', str(geral), 'juntar', str(regs[0]), str(regs[1]), str(regs[0])],
+                           capture_output=True, text=True)
+        assert r.returncode == 0, r.stderr
+        assert '6 sessões em 2 máquina' in r.stdout, r.stdout  # o mesmo arquivo duas vezes não conta em dobro
+        for cmd in (['nivel.py', '--registro', str(geral), 'relatorio', '--geral'], ['certificado.py', '--nome', 'Ana', '--registro', str(geral), '--geral']):
+            r = subprocess.run([py, str(med / cmd[0])] + cmd[1:], capture_output=True, text=True)
+            assert r.returncode == 0, r.stderr
+        h = next(geral.glob('certificado-geral-*.html')).read_text()
+        assert 'de <b>2</b> máquinas (vps-a, vps-b)' in h and '<b>6</b> sessões' not in h
+        assert json.loads((geral / 'relatorio-geral.json').read_text())['maquinas'] == {'vps-a': 3, 'vps-b': 3}
+        assert not list(geral.glob('medicao-*.json'))  # o geral não gera arquivo para somar
+
+
+@caso
 def t_idiomas_relatorio_e_certificado():
     import subprocess
     pt = N.idioma('pt')
