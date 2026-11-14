@@ -38,7 +38,8 @@ Who does what: 🧠 you · ⚙️ script or timer
 6. ⚙️ **All connections:** `python3 medir/nivel.py conexoes` lists each program, site, service, agent, and skill, with the first and last time it was used.
 7. ⚙️ **Run automatically every day:** `sh systemd/instalar.sh` enables a timer at 06:20 that repeats steps 4 and 5 and saves the history in `registro/historico.jsonl`.
 8. ⚙️ **Certificate:** `python3 medir/certificado.py --nome "Your Name" --lang en` generates `registro/certificado-AAAA-MM-DD-en.html`: rung, AL1–AL5 ladder, tasks, week-by-week progress, and projection (1, 3, and 6 months). Open it in a browser and use the button to save it as a PDF. Longer period: `nivel.py --registro /tmp/n90 varrer --dias 90`, `nivel.py --registro /tmp/n90 relatorio --lang en`, and `certificado.py --nome "Your Name" --lang en --registro /tmp/n90`.
-9. 🧠 **Once a week:** read the report, choose ONE task to move up a rung (criteria in ESCADA.md) and move down a task that went badly.
+9. ⚙️ **Several machines (optional):** on each machine, step 8 writes, next to that machine's certificate, the file `medicao-<machine>-AAAA-MM-DD.json` (numbers, connections and task only; no prompt text and no folders). On one machine, combine them: `python3 medir/nivel.py juntar medicao-laptop-*.json medicao-pc-*.json` (or straight from the path: `juntar user@host:/path/to/registro`, with `--chave` if needed), then `nivel.py relatorio --geral` and `certificado.py --nome "Your Name" --geral --lang en` → `registro/certificado-geral-AAAA-MM-DD-en.html` ("on N machines"). The same conversation never counts twice. `nivel.py maquinas` lists them; `--tirar NAME` removes one. Machine name: `varrer --maquina "Laptop"` (default: the hostname).
+10. 🧠 **Once a week:** read the report, choose ONE task to move up a rung (criteria in ESCADA.md) and move down a task that went badly.
 
 ## 🎓 Certificate: step by step
 

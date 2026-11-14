@@ -287,6 +287,8 @@ def main():
     curva, origem, pouco = semanas(ss), 'semanas', False
     if len(curva) < 2:  # pouco uso: o gráfico sai do mesmo jeito, com semanas menores e aviso
         menor = semanas(ss, MIN_POUCO_USO)
+        if len(menor) < 2:
+            menor = semanas(ss, 0)  # último recurso: toda semana com algum uso (o gráfico sempre sai)
         if len(menor) >= 2:
             curva, pouco = menor, True
     if len(curva) < 2:

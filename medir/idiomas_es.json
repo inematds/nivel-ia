@@ -112,7 +112,7 @@
   "evol_txt": "De <b>{v0}</b> {rot}{d0} a <b>{v1}</b> {rot}{d1}.",
   "rot_semana": "en la semana del ",
   "rot_medicao": "el ",
-  "pouco_uso": "Poco uso en el período ({h} h con IA en las semanas del gráfico): la curva cuenta semanas desde 15 minutos y sirve como indicación. Con más semanas de uso, se vuelve firme.",
+  "pouco_uso": "Poco uso en el período ({h} h con IA en las semanas del gráfico): la curva cuenta también las semanas con poco uso y sirve como indicación. Con más semanas de uso, se vuelve firme.",
   "primeira": "Primera medición registrada. A partir de la próxima, este certificado mostrará tu evolución.",
   "tarefas": "Tareas principales",
   "th_tarefa": "Tarea",

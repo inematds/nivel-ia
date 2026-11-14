@@ -38,7 +38,8 @@ Quem faz: 🧠 você · ⚙️ script ou timer
 6. ⚙️ **Todas as conexões:** `python3 medir/nivel.py conexoes` lista cada programa, site, serviço, agente e skill, com a primeira e a última vez.
 7. ⚙️ **Todo dia sozinho:** `sh systemd/instalar.sh` liga um timer às 06:20 que repete os passos 4 e 5 e guarda o histórico em `registro/historico.jsonl`.
 8. ⚙️ **Certificado:** `python3 medir/certificado.py --nome "Seu Nome"` gera `registro/certificado-AAAA-MM-DD.html`: degrau, escada AL1–AL5, tarefas, evolução semana a semana e projeção (1, 3 e 6 meses). Abre no navegador e vira PDF no botão. Período maior: `nivel.py --registro /tmp/n90 varrer --dias 90`, `nivel.py --registro /tmp/n90 relatorio` e `certificado.py --nome "Seu Nome" --registro /tmp/n90`.
-9. 🧠 **Uma vez por semana:** leia o relatório, escolha UMA tarefa para subir um degrau (critérios em ESCADA.md) e desça a que errou feio.
+9. ⚙️ **Várias máquinas (opcional):** em cada máquina, o passo 8 grava, ao lado do certificado da máquina, o arquivo `medicao-<máquina>-AAAA-MM-DD.json` (só números, conexões e tarefa; sem o texto dos pedidos e sem as pastas). Numa máquina só, junte: `python3 medir/nivel.py juntar medicao-notebook-*.json medicao-pc-*.json` (ou direto pelo caminho: `juntar usuario@host:/caminho/do/registro`, com `--chave` se precisar), depois `nivel.py relatorio --geral` e `certificado.py --nome "Seu Nome" --geral` → `registro/certificado-geral-AAAA-MM-DD.html` ("de N máquinas"). A mesma conversa nunca conta duas vezes. `nivel.py maquinas` lista as juntadas; `--tirar NOME` tira uma. Nome da máquina: `varrer --maquina "Notebook"` (padrão: o hostname).
+10. 🧠 **Uma vez por semana:** leia o relatório, escolha UMA tarefa para subir um degrau (critérios em ESCADA.md) e desça a que errou feio.
 
 ## 🎓 Certificado: passo a passo
 
