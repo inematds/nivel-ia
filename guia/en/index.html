@@ -256,6 +256,7 @@
     <div class="card teto"><h3>🛑 Critical tasks stop at AL4</h3><p>When an error could cause public, financial, or security harm (publishing, money, servers, customers), AI leads and you review. It doesn’t move to AL5. Mark “critical? = y” on the sheet. If the column is blank, the program decides based on words in the task name (publish, post, customer, payment, money, server, email); anything you mark, y or n, overrides the words.</p></div>
     <div class="card desce"><h3>⬇️ When to move down a rung</h3><p><b>One serious error</b> (something incorrect went out, data was lost, or more was spent than intended): move down right away. <b>Three big fixes in the last 10 times</b>: move down. Since moving up allows at most two, the rules never conflict. If the tool or process changed, move down one rung on your own until you measure again. This applies at any rung, including AL5.</p></div>
   </div>
+  <div class="card" style="margin-top:16px"><h3>🧭 Your plan to move up is already in the report</h3><p>The <b>"Your plan to move up"</b> section of the report picks the <b>3 tasks that have the biggest impact on your number</b> and shows, for each one, how much the AI-led part goes up if it reaches AL4 (in points), what level it is at today, and the concrete next step, based on your data. Real example from Nei: <b>Producing videos, AL3 → AL4, up to +15.5 points</b>. Today, the AI does 6.5 actions per message from him, and AL4 starts at 15. The step: ask for the entire task in one message, with the completion criteria, and review only at the end. The hours that fell under "Other tasks" appear separately, with a tip to give them a name. With less than 1 hour a week with AI, the plan starts by using it more. The plan is in the report, not on the certificate.</p></div>
 </div></section>
 
 <section id="medir"><div class="wrap">
@@ -273,7 +274,8 @@
     <tr><td>Which doors have I opened to AI?</td><td>“Conexões registradas” (“Recorded connections”), with the first and last time each was used</td></tr>
     <tr><td>Which task can move up or down now?</td><td>“Pode subir” (“Can move up”) and “Descer um degrau” (“Move down a rung”) in the report, checked against the sheet’s quality columns</td></tr>
     <tr><td>Did AI get it right?</td><td>Only the sheet’s “corrigi?” (“Fixed?”) and “erro grave?” (“Serious error?”) columns. The program measures autonomy, not accuracy.</td></tr>
-  </table>
+      <tr><td>Where do I start to move up?</td><td>"Your plan to move up" in the report: the 3 tasks with the biggest gains and the next step for each</td></tr>
+</table>
 </div></section>
 
 <section id="caso"><div class="wrap">
@@ -320,7 +322,9 @@
   <p>Open <b>Claude Code</b> or <b>Codex</b> on your computer, paste the request below (replace the name), and wait a few minutes. It downloads the kit, measures your activity, generates the certificate, and opens it in your browser.</p>
   <div class="box" style="user-select:all"><p>Download the kit from https://github.com/inematds/nivel-ia into a folder named nivel-ia (use it if it already exists), measure my last 30 days with <code>python3 medir/nivel.py varrer --dias 30</code> and <code>python3 medir/nivel.py relatorio --lang en</code>, generate my certificate with <code>python3 medir/certificado.py --nome "Your Name" --lang en</code>, and open the certificate in the browser. At the end, tell me where the certificate and report were saved and summarize the results in 3 lines. Do not open the file registro/sessoes.json and do not send my data to any other service or website.</p></div>
   <p class="mut">Want 90 days? Add this to your request: "measure 90 days in a separate folder (<code>--registro /tmp/n90</code>), without changing the daily log". First, keep in mind: Claude Code deletes records older than 30 days unless you increase <code>cleanupPeriodDays</code> in its settings (e.g., to 365) and wait for the history to accumulate. Anything already deleted cannot be recovered. If the records cover fewer days than you requested, the meter will warn you in the report and certificate.</p>
-  <h3 style="margin-top:1.6em">Where the files are saved</h3>
+    <h3 style="margin-top:1.6em">Work on multiple machines?</h3>
+  <p>Run the kit on each machine. Each one generates <b>three separate things</b>: the <b>machine certificate</b> ("from the Notebook machine"), the file <code>medicao-&lt;máquina&gt;-AAAA-MM-DD.json</code> to combine (numbers only, connections, and task name; no text from your prompts and no folders) and, after combining, the <b>overall certificate</b> ("from 3 machines"). To combine them, move the measurement files to one machine, or provide the path to each one (<code>usuario@host:/caminho/do/registro</code>). The same conversation is never counted twice. <a href="#passo-maquinas">Step by step ↓</a></p>
+<h3 style="margin-top:1.6em">Where the files are saved</h3>
   <table class="t">
     <tr><th>File</th><th>What it is</th></tr>
     <tr><td><code>nivel-ia/registro/certificado-AAAA-MM-DD-en.html</code></td><td>The certificate. Open it in your browser and use the "Save as PDF" button.</td></tr>
@@ -358,7 +362,8 @@
     <tr><td>5 to 14 actions per message from you</td><td>AL3</td></tr>
     <tr><td>Fewer than 5 actions per message from you (includes a standalone question)</td><td>AL2</td></tr>
     <tr><td>What you do without AI</td><td>AL1 (sheet only)</td></tr>
-  </table>
+      <tr><td><code>nivel-ia/registro/medicao-&lt;máquina&gt;-AAAA-MM-DD.json</code></td><td>The file to combine with other machines. It is created next to the certificate, without the text of your prompts.</td></tr>
+</table>
   <p class="sub" style="margin-top:12px">The thresholds are at the top of <code>medir/nivel.py</code> (<code>LIMITE_AL4</code>, <code>LIMITE_AL3</code>). Tasks are inferred from words in the first request of each session; to use your own, copy <code>medir/tarefas.exemplo.json</code> to <code>medir/tarefas.json</code> and edit it (each line: task name, whether it is critical, identifying words). Moving up and down is checked against the sheet: up to 1 big fix in the last 10 times to reach AL3, up to 2 in 20 for AL4, up to 2 in 50 and no serious errors for AL5; 1 serious error or 3 big fixes in the last 10 times = move down. Folders and files used are recorded only on the sheet: the program records programs, sites, services, helpers, and skills.</p>
 </div></section>
 
@@ -378,7 +383,7 @@
 <pre><span class="k">git clone</span> <span class="s">https://github.com/inematds/nivel-ia</span> && <span class="k">cd</span> nivel-ia</pre></div></div>
   <div class="step"><div class="b">2</div><div><h3>Measure the last 30 days</h3><p>Reads the logs on this machine and saves <code>registro/sessoes.json</code> (outside git).</p>
 <pre><span class="k">python3 medir/nivel.py varrer</span> --dias 30   <span class="c"># "16701 sessões (9820 Claude Code, 6881 Codex) em 30 dias"</span></pre></div></div>
-  <div class="step"><div class="b">3</div><div><h3>Read the report</h3><p>Ladder, tasks, next rung, who can move up or down, and connections. It’s saved in <code>registro/relatorio.md</code>. Background sessions from other programs are excluded, so the report counts slightly fewer than the scan. Note: the report, the command output and the column names of kit/papel-modelo.csv are in Portuguese (data, tarefa, nivel, minutos, conexao, corrigi, grave); the program also accepts the English names on the sheet (date, task, level, minutes, connection, fixed, serious) and y/yes.</p>
+  <div class="step"><div class="b">3</div><div><h3>Read the report</h3><p>Ladder, tasks, next rung, who can move up or down, and connections. It’s saved in <code>registro/relatorio.md</code>. Background sessions from other programs are excluded, so the report counts slightly fewer than the scan. Note: the report, the command output and the column names of kit/papel-modelo.csv are in Portuguese (data, tarefa, nivel, minutos, conexao, corrigi, grave); the program also accepts the English names on the sheet (date, task, level, minutes, connection, fixed, serious) and y/yes. At the end comes <b>"Your plan to move up"</b>: the 3 tasks that have the biggest impact on your number and the next step for each.</p>
 <pre><span class="k">python3 medir/nivel.py relatorio --lang en</span>   <span class="c"># "A IA conduz **56.2%** do trabalho medido (AL4 + AL5)"</span></pre></div></div>
   <div class="step"><div class="b">4</div><div><h3>See all connections</h3><p>Each program, site, service, agent, and skill, with the number of sessions and the first and last time it appeared.</p>
 <pre><span class="k">python3 medir/nivel.py conexoes</span></pre></div></div>
@@ -393,7 +398,13 @@
 <span class="k">python3</span> medir/nivel.py --registro /tmp/n90 varrer --dias 90
 <span class="k">python3</span> medir/nivel.py --registro /tmp/n90 relatorio --lang en
 <span class="k">python3</span> medir/certificado.py --nome <span class="s">"Your Name"</span> --lang en --registro /tmp/n90</pre></div></div>
-  <div class="step"><div class="b">8</div><div><h3>Decide once a week</h3><p>Choose ONE task to move up a rung using the criterion above, and move down the one with a serious mistake. Kit tests: <code>python3 tests/run.py</code> (46 tests with fake records).</p></div></div>
+    <div class="step" id="passo-maquinas"><div class="b">8</div><div><h3>Combine your machines (optional)</h3><p>On each machine, step 7 saves the file <code>medicao-&lt;máquina&gt;-AAAA-MM-DD.json</code> next to the certificate. On one machine, combine the files (or provide the direct path to each machine) and generate the report and overall certificate. <code>nivel.py maquinas</code> lists what was combined; <code>--tirar NOME</code> removes a machine. The name of each machine is its hostname, or what you specify with <code>varrer --maquina "Notebook"</code>.</p>
+<pre><span class="k">python3</span> medir/nivel.py juntar medicao-notebook-*.json medicao-pc-*.json
+<span class="c"># or directly by path:</span>
+<span class="k">python3</span> medir/nivel.py juntar usuario@host:/caminho/nivel-ia/registro
+<span class="k">python3</span> medir/nivel.py relatorio --geral
+<span class="k">python3</span> medir/certificado.py --nome <span class="s">"Seu Nome"</span> --geral   <span class="c"># registro/certificado-geral-AAAA-MM-DD.html</span></pre></div></div>
+<div class="step"><div class="b">9</div><div><h3>Decide once a week</h3><p>Choose ONE task to move up a rung using the criterion above, and move down the one with a serious mistake. Kit tests: <code>python3 tests/run.py</code> (50 tests with fake records). Start with the 1st task in "Your plan to move up".</p></div></div>
 </div></section>
 
 <section id="passo-certificado"><div class="wrap">

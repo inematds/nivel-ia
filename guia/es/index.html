@@ -256,6 +256,7 @@
     <div class="card teto"><h3>🛑 Las tareas críticas se detienen en AL4</h3><p>Cuando un error puede causar un perjuicio público, financiero o de seguridad (publicar, dinero, servidores, clientes), la IA guía y tú revisas. No pasa a AL5. Marca «¿crítica? = s» en la hoja. Si la columna queda en blanco, el programa decide según las palabras del nombre de la tarea (publicar, post, cliente, pago, dinero, servidor, correo electrónico); lo que marques, s o n, tiene prioridad sobre las palabras.</p></div>
     <div class="card desce"><h3>⬇️ Cuándo bajar un peldaño</h3><p><b>Un error grave</b> (se publicó algo incorrecto, se perdió un dato o se gastó dinero de más): baja de inmediato. <b>Tres correcciones grandes en las últimas 10 veces</b>: baja. Como para subir se admiten como máximo dos, las reglas nunca se contradicen. Si cambió la herramienta o el proceso, baja un peldaño por tu cuenta hasta volver a medir. Esto vale para cualquier peldaño, incluido AL5.</p></div>
   </div>
+  <div class="card" style="margin-top:16px"><h3>🧭 Tu plan para subir ya viene listo en el informe</h3><p>La sección <b>"Tu plan para subir"</b> del informe elige las <b>3 tareas que más influyen en tu número</b> y muestra, para cada una, cuánto sube la parte conducida por IA si llega a AL4 (en puntos), en qué peldaño está hoy y el paso concreto, extraído de tus datos. Ejemplo real de Nei: <b>Producir videos, AL3 → AL4, hasta +15,5 puntos</b>. Hoy la IA realiza 6,5 acciones por mensaje suyo, y AL4 empieza en 15. El paso: pedir la tarea completa en un mensaje, con el criterio para darla por terminada, y revisar solo al final. Las horas que quedaron en "Otras tareas" aparecen aparte, con el consejo de ponerles nombre. Con menos de 1 hora por semana con la IA, el plan empieza por usarla más. El plan está en el informe, no en el certificado.</p></div>
 </div></section>
 
 <section id="medir"><div class="wrap">
@@ -273,7 +274,8 @@
     <tr><td>¿Qué puertas abrí para la IA?</td><td>«Conexões registradas» (Conexiones registradas), con la primera y la última vez de uso</td></tr>
     <tr><td>¿Qué tarea puede subir o bajar ahora?</td><td>«Pode subir» (Puede subir) y «Descer um degrau» (Bajar un peldaño) en el informe, verificadas con las columnas de acierto de la hoja</td></tr>
     <tr><td>¿La IA acertó?</td><td>Solo las columnas «corrigi?» y «erro grave?» de la hoja. El programa mide autonomía, no acierto.</td></tr>
-  </table>
+      <tr><td>¿Por dónde empiezo a subir?</td><td>"Tu plan para subir" en el informe: las 3 tareas con mayor ganancia y el paso para cada una</td></tr>
+</table>
 </div></section>
 
 <section id="caso"><div class="wrap">
@@ -320,7 +322,9 @@
   <p>Abre <b>Claude Code</b> o <b>Codex</b> en tu computadora, pega el pedido de abajo (cambia el nombre) y espera unos minutos. Descarga el kit, mide, genera el certificado y lo abre en el navegador.</p>
   <div class="box" style="user-select:all"><p>Descarga el kit https://github.com/inematds/nivel-ia en una carpeta nivel-ia (si ya existe, úsala), mide mis últimos 30 días con <code>python3 medir/nivel.py varrer --dias 30</code> y <code>python3 medir/nivel.py relatorio --lang es</code>, genera mi certificado con <code>python3 medir/certificado.py --nome "Tu Nombre" --lang es</code> y abre el certificado en el navegador. Al final, dime dónde quedaron el certificado y el informe y resume en 3 líneas qué resultado dio. No abras el archivo registro/sessoes.json ni envíes mis datos a ningún otro servicio ni sitio.</p></div>
   <p class="mut">¿Quieres 90 días? Agrega al pedido: "mide 90 días en una carpeta aparte (<code>--registro /tmp/n90</code>), sin modificar el registro diario". Antes, ten en cuenta que Claude Code borra los registros de más de 30 días, a menos que aumentes <code>cleanupPeriodDays</code> en su configuración (p. ej., 365) y esperes a que se acumule el historial. Lo que ya se borró no se puede recuperar. Si los registros cubren menos días de los que pediste, el medidor lo avisa en el informe y en el certificado.</p>
-  <h3 style="margin-top:1.6em">Dónde quedan los archivos</h3>
+    <h3 style="margin-top:1.6em">¿Trabajas en varias máquinas?</h3>
+  <p>Ejecuta el kit en cada máquina. Cada una genera <b>tres cosas separadas</b>: el <b>certificado de la máquina</b> ("de la máquina Notebook"), el archivo <code>medicao-&lt;máquina&gt;-AAAA-MM-DD.json</code> para sumar (solo números, conexiones y el nombre de la tarea; sin el texto de tus solicitudes y sin las carpetas) y, después de unirlos, el <b>certificado general</b> ("de 3 máquinas"). Para unirlos, lleva los archivos de medición a una sola máquina o indica la ruta de cada una (<code>usuario@host:/caminho/do/registro</code>). La misma conversación nunca se cuenta dos veces. <a href="#passo-maquinas">Paso a paso ↓</a></p>
+<h3 style="margin-top:1.6em">Dónde quedan los archivos</h3>
   <table class="t">
     <tr><th>Archivo</th><th>Qué es</th></tr>
     <tr><td><code>nivel-ia/registro/certificado-AAAA-MM-DD-es.html</code></td><td>El certificado. Ábrelo en el navegador y usa el botón "Guardar como PDF".</td></tr>
@@ -358,7 +362,8 @@
     <tr><td>De 5 a 14 acciones por mensaje tuyo</td><td>AL3</td></tr>
     <tr><td>Menos de 5 acciones por mensaje tuyo (incluye una pregunta aislada)</td><td>AL2</td></tr>
     <tr><td>Lo que haces sin IA</td><td>AL1 (solo en la hoja)</td></tr>
-  </table>
+      <tr><td><code>nivel-ia/registro/medicao-&lt;máquina&gt;-AAAA-MM-DD.json</code></td><td>El archivo para sumar con otras máquinas. Se genera junto al certificado, sin el texto de las solicitudes.</td></tr>
+</table>
   <p class="sub" style="margin-top:12px">Los límites están al inicio de <code>medir/nivel.py</code> (<code>LIMITE_AL4</code>, <code>LIMITE_AL3</code>). Las tareas se identifican mediante palabras de la primera solicitud de cada sesión; para usar las tuyas, copia <code>medir/tarefas.exemplo.json</code> a <code>medir/tarefas.json</code> y edítalo (cada línea: nombre de la tarea, si es crítica y palabras que la identifican). La subida y la bajada se verifican con la hoja: hasta 1 corrección grande en las últimas 10 veces para llegar a AL3, hasta 2 en 20 para AL4, hasta 2 en 50 y ningún error grave para llegar a AL5; 1 error grave o 3 correcciones grandes en las últimas 10 = bajar. Las carpetas y los archivos usados quedan solo en la hoja: el programa registra programas, sitios, servicios, ayudantes y skills.</p>
 </div></section>
 
@@ -378,7 +383,7 @@
 <pre><span class="k">git clone</span> <span class="s">https://github.com/inematds/nivel-ia</span> && <span class="k">cd</span> nivel-ia</pre></div></div>
   <div class="step"><div class="b">2</div><div><h3>Mide los últimos 30 días</h3><p>Lee los registros de esta computadora y guarda <code>registro/sessoes.json</code> (fuera de git).</p>
 <pre><span class="k">python3 medir/nivel.py varrer</span> --dias 30   <span class="c"># "16701 sessões (9820 Claude Code, 6881 Codex) em 30 dias"</span></pre></div></div>
-  <div class="step"><div class="b">3</div><div><h3>Lee el informe</h3><p>Escalera, tareas, próximo peldaño, quién puede subir o bajar y conexiones. Está en <code>registro/relatorio.md</code>. Las sesiones de fondo de otros programas se excluyen; por eso el informe cuenta un poco menos que el escaneo. Nota: el informe, la salida de los comandos y los nombres de las columnas de kit/papel-modelo.csv están en portugués (data, tarefa, nivel, minutos, conexao, corrigi, grave); el programa también acepta en la hoja los nombres en español (fecha, tarea, conexión) y sí.</p>
+  <div class="step"><div class="b">3</div><div><h3>Lee el informe</h3><p>Escalera, tareas, próximo peldaño, quién puede subir o bajar y conexiones. Está en <code>registro/relatorio.md</code>. Las sesiones de fondo de otros programas se excluyen; por eso el informe cuenta un poco menos que el escaneo. Nota: el informe, la salida de los comandos y los nombres de las columnas de kit/papel-modelo.csv están en portugués (data, tarefa, nivel, minutos, conexao, corrigi, grave); el programa también acepta en la hoja los nombres en español (fecha, tarea, conexión) y sí. Al final aparece <b>"Tu plan para subir"</b>: las 3 tareas que más influyen en tu número y el paso para cada una.</p>
 <pre><span class="k">python3 medir/nivel.py relatorio --lang es</span>   <span class="c"># "A IA conduz **56.2%** do trabalho medido (AL4 + AL5)"</span></pre></div></div>
   <div class="step"><div class="b">4</div><div><h3>Revisa todas las conexiones</h3><p>Cada programa, sitio, servicio, agente y skill, con el número de sesiones y la primera y la última vez.</p>
 <pre><span class="k">python3 medir/nivel.py conexoes</span></pre></div></div>
@@ -393,7 +398,13 @@
 <span class="k">python3</span> medir/nivel.py --registro /tmp/n90 varrer --dias 90
 <span class="k">python3</span> medir/nivel.py --registro /tmp/n90 relatorio --lang es
 <span class="k">python3</span> medir/certificado.py --nome <span class="s">"Tu Nombre"</span> --lang es --registro /tmp/n90</pre></div></div>
-  <div class="step"><div class="b">8</div><div><h3>Decide una vez por semana</h3><p>Elige UNA tarea para subir un peldaño según el criterio anterior, y baja el nivel de la que tuvo un error grave. Pruebas del kit: <code>python3 tests/run.py</code> (46 pruebas con registros falsos).</p></div></div>
+    <div class="step" id="passo-maquinas"><div class="b">8</div><div><h3>Une tus máquinas (opcional)</h3><p>En cada máquina, el paso 7 guarda, junto al certificado, el archivo <code>medicao-&lt;máquina&gt;-AAAA-MM-DD.json</code>. En una sola máquina, une los archivos (o indica la ruta directa de cada máquina) y genera el informe y el certificado general. <code>nivel.py maquinas</code> muestra lo que se unió; <code>--tirar NOME</code> quita una máquina. El nombre de cada máquina es el hostname o el que indiques con <code>varrer --maquina "Notebook"</code>.</p>
+<pre><span class="k">python3</span> medir/nivel.py juntar medicao-notebook-*.json medicao-pc-*.json
+<span class="c"># o directamente con la ruta:</span>
+<span class="k">python3</span> medir/nivel.py juntar usuario@host:/caminho/nivel-ia/registro
+<span class="k">python3</span> medir/nivel.py relatorio --geral
+<span class="k">python3</span> medir/certificado.py --nome <span class="s">"Seu Nome"</span> --geral   <span class="c"># registro/certificado-geral-AAAA-MM-DD.html</span></pre></div></div>
+<div class="step"><div class="b">9</div><div><h3>Decide una vez por semana</h3><p>Elige UNA tarea para subir un peldaño según el criterio anterior, y baja el nivel de la que tuvo un error grave. Pruebas del kit: <code>python3 tests/run.py</code> (50 pruebas con registros falsos). Empieza por la primera de "Tu plan para subir".</p></div></div>
 </div></section>
 
 <section id="passo-certificado"><div class="wrap">
