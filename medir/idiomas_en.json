@@ -108,6 +108,7 @@
   "evol_txt": "From <b>{v0}</b> {rot}{d0} to <b>{v1}</b> {rot}{d1}.",
   "rot_semana": "in the week of ",
   "rot_medicao": "on ",
+  "pouco_uso": "Light use in the period ({h} h with AI in the charted weeks): the curve counts weeks from 15 minutes up and is only an indication. With more weeks of use, it becomes solid.",
   "primeira": "First measurement recorded. Starting with the next one, this certificate will show your progress.",
   "tarefas": "Main tasks",
   "th_tarefa": "Task",

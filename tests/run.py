@@ -421,6 +421,33 @@ def t_certificado_curva_e_projecao():
 
 
 @caso
+def t_certificado_pouco_uso_tem_grafico_e_aviso_no_rodape():
+    """nenhuma semana com 10 h: o gráfico sai do mesmo jeito (semanas de 15 min+) com aviso; limite do registro vai ao rodapé"""
+    import datetime as dt
+    import subprocess
+    with tempfile.TemporaryDirectory() as d:
+        rel = {'gerado_em': '2026-11-13T04:00:00-03:00', 'dias': 180, 'parte_ia': 30.0,
+               'escada': {'AL1': 0.0, 'AL2': 40.0, 'AL3': 30.0, 'AL4': 0.0, 'AL5': 30.0}, 'tem_papel': False,
+               'fontes': {'conversas': 5, 'sozinhas': 5, 'acoes': 50}, 'tarefas': [],
+               'cobertura_curta': {'claude': {'dias': 97, 'desde': '2026-08-09'}}}
+        Path(d, 'relatorio.json').write_text(json.dumps(rel))
+        seg0 = dt.datetime(2026, 9, 7, 12)
+        ss = [{'inicio': (seg0 + dt.timedelta(weeks=w)).timestamp(), 'minutos': 60 + 20 * w, 'nivel': 'AL5' if w % 2 else 'AL2'}
+              for w in range(4)]
+        ss.append({'inicio': (seg0 + dt.timedelta(weeks=5)).timestamp(), 'minutos': 5, 'nivel': 'AL5'})  # 5 min: fica fora
+        Path(d, 'sessoes.json').write_text(json.dumps({'sessoes': ss}))
+        out = Path(d, 'c.html')
+        r = subprocess.run([sys.executable, str(RAIZ / 'medir' / 'certificado.py'), '--nome', 'Tiza', '--registro', d, '--saida', str(out)],
+                           capture_output=True, text=True)
+        assert r.returncode == 0, r.stderr
+        h = out.read_text()
+        assert '<svg' in h and 'Pouco uso no período' in h and 'Primeira medição' not in h
+        assert 'semana de 28/09' in h and '12/10' not in h  # semana de 5 min não entra
+        corpo, rodape = h.split('<div class="rodape">')
+        assert 'cobrem só 97' not in corpo.split('<body>')[1] and 'cobrem só 97' in rodape
+
+
+@caso
 def t_idiomas_relatorio_e_certificado():
     import subprocess
     pt = N.idioma('pt')

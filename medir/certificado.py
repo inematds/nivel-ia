@@ -32,6 +32,7 @@ def usar_idioma(lang):
 
 
 MIN_HORAS_SEMANA = 10      # semana com menos horas de trabalho com IA fica fora da curva (amostra pequena)
+MIN_POUCO_USO = 0.25       # quem usa pouco (nenhuma semana com 10 h): curva com semanas de 15 min ou mais, com aviso
 MES_DIAS = 30.44
 
 
@@ -44,6 +45,10 @@ def data_br(d, curta=False):
     return C['data_longa'].format(dia=d.day, mes=C['meses'][d.month - 1], ano=d.year)
 
 
+def horas(x):
+    return f'{x:.1f}' if LANG == 'en' else f'{x:.1f}'.replace('.', ',')
+
+
 def num(x):
     return f'{x:,.0f}' if LANG == 'en' else f'{x:,.0f}'.replace(',', '.')
 
@@ -52,7 +57,7 @@ def pct(x):
     return f'{x:.1f}'.replace('.', T['cert']['decimal']) + '%'
 
 
-def semanas(caminho):
+def semanas(caminho, minimo=MIN_HORAS_SEMANA):
     """% conduzido pela IA (AL4+AL5) por semana, com o mesmo peso do relatório (minutos, mínimo 0,05)."""
     if not os.path.exists(caminho):
         return []
@@ -70,7 +75,7 @@ def semanas(caminho):
         a = soma.setdefault(seg, [0.0, 0.0])
         a[1] += p
         a[0] += p if s.get('nivel') in ('AL4', 'AL5') else 0
-    pts = [(seg, 100 * ia / tot, tot / 60) for seg, (ia, tot) in sorted(soma.items()) if tot / 60 >= MIN_HORAS_SEMANA]
+    pts = [(seg, 100 * ia / tot, tot / 60) for seg, (ia, tot) in sorted(soma.items()) if tot / 60 >= minimo]
     if len(pts) >= 4:  # semanas do começo com bem menos uso (registro ainda incompleto) distorcem a evolução
         med = sorted(h for _, _, h in pts)[len(pts) // 2]
         while len(pts) > 3 and pts[0][2] < 0.25 * med:
@@ -132,7 +137,7 @@ def grafico(pontos):
             f'{grade}<polygon points="{area}" class="area"/><polyline points="{linha}" class="lin"/>{marcas}{datas}{fim}</svg>')
 
 
-def montar(rel, curva, nome, origem_curva):
+def montar(rel, curva, nome, origem_curva, pouco_uso=False):
     C, NOMES, EXPLICA = T['cert'], T['nomes'], T['explica']
     tn = lambda t: T['tarefas'].get(t, t)
     e = rel['escada']
@@ -153,7 +158,8 @@ def montar(rel, curva, nome, origem_curva):
         (d0, v0, _), (d1, v1, _) = curva[0], curva[-1]
         rotulo = C['rot_semana'] if origem_curva == 'semanas' else C['rot_medicao']
         evol = (f'<h2>{C["evol_semanas"] if origem_curva == "semanas" else C["evol_medicoes"]}</h2>{grafico(curva)}'
-                '<p class="evol">' + C['evol_txt'].format(v0=pct(v0), v1=pct(v1), rot=rotulo, d0=data_br(d0, True), d1=data_br(d1, True)) + '</p>')
+                '<p class="evol">' + C['evol_txt'].format(v0=pct(v0), v1=pct(v1), rot=rotulo, d0=data_br(d0, True), d1=data_br(d1, True)) + '</p>'
+                + (f'<p class="nota">{C["pouco_uso"].format(h=horas(sum(x[2] for x in curva)))}</p>' if pouco_uso else ''))
     else:
         evol = f'<p class="evol">{C["primeira"]}</p>'
     # projeção
@@ -217,18 +223,20 @@ th{{font:600 10.5px Sora,sans-serif;color:var(--mut);text-align:left;padding:0 4
 .nota{{font-size:11px;color:var(--mut);margin:4px 0 0}}
 .aviso{{color:#9a3412;font-weight:600}}
 ul.esc{{list-style:none;margin:0;padding:0;font-size:12px}} ul.esc li{{margin:2px 0}} ul.esc b{{display:inline-block;width:30px;font:800 11.5px Sora,sans-serif}}
-.rodape{{position:absolute;left:15mm;right:15mm;bottom:10mm;display:flex;justify-content:space-between;gap:10mm;font-size:10.5px;color:var(--mut);border-top:1px solid var(--linha);padding-top:5px}}
+.rodape{{position:absolute;left:15mm;right:15mm;bottom:10mm;font-size:10.5px;color:var(--mut)}}
+.linrod{{display:flex;justify-content:space-between;gap:10mm;border-top:1px solid var(--linha);padding-top:5px}}
+.avisos .nota{{margin:0 0 3px;font-size:10px}}
 .rodape b{{color:var(--tinta)}}
 .botao{{display:block;width:max-content;margin:0 auto 20px;font:600 14px Sora,sans-serif;background:var(--tinta);color:#fff;border:0;border-radius:10px;padding:10px 18px;cursor:pointer}}
 @media print{{body{{background:none}} .folha{{margin:0;box-shadow:none}} .botao{{display:none}}}}
-@media (max-width:1150px){{.folha{{width:auto;height:auto;margin:8px;padding-bottom:8mm}} .grade{{grid-template-columns:1fr}} .rodape{{position:static;margin-top:8mm;flex-direction:column}}}}
+@media screen and (max-width:1150px){{.folha{{width:auto;height:auto;margin:8px;padding-bottom:8mm}} .grade{{grid-template-columns:1fr}} .rodape{{position:static;margin-top:8mm}} .linrod{{flex-direction:column}}}}
 </style></head><body>
 <div class="folha">
   <div class="topo"><span><b>INEMA<span class="ponto">.</span>CLUB</b> · {C['topo_esq']}</span><span>{C['topo_dir']}</span></div>
   <h1>{C['h1']}</h1>
   <p class="quem">{C['quem']}</p>
   <div class="nome">{html.escape(nome)}</div>
-  <p class="txt">{medido}</p>{curta}
+  <p class="txt">{medido}</p>
   <div class="grade">
     <div>
       <div class="big"><span class="n">{pct(rel["parte_ia"])}</span><span class="l">{C['big']}</span></div>
@@ -244,8 +252,9 @@ ul.esc{{list-style:none;margin:0;padding:0;font-size:12px}} ul.esc li{{margin:2p
     </div>
   </div>
   <div class="rodape">
-    <span>{C['rodape']}</span>
-    <span>{C['emitido'].format(data=data_br(hoje))} · <b>inema.club</b></span>
+    {f'<div class="avisos">{curta}</div>' if curta else ''}
+    <div class="linrod"><span>{C['rodape']}</span>
+    <span>{C['emitido'].format(data=data_br(hoje))} · <b>inema.club</b></span></div>
   </div>
 </div>
 <button class="botao" onclick="window.print()">{C['botao']}</button>
@@ -265,12 +274,16 @@ def main():
     if not os.path.exists(arq):
         sys.exit(T['cert']['falta_rel'])
     rel = json.load(open(arq, encoding='utf-8'))
-    curva, origem = semanas(os.path.join(a.registro, 'sessoes.json')), 'semanas'
+    curva, origem, pouco = semanas(os.path.join(a.registro, 'sessoes.json')), 'semanas', False
+    if len(curva) < 2:  # pouco uso: o gráfico sai do mesmo jeito, com semanas menores e aviso
+        menor = semanas(os.path.join(a.registro, 'sessoes.json'), MIN_POUCO_USO)
+        if len(menor) >= 2:
+            curva, pouco = menor, True
     if len(curva) < 2:
         curva, origem = historico(os.path.join(a.registro, 'historico.jsonl')), 'medicoes'
     hoje = rel['gerado_em'][:10]
     saida = a.saida or os.path.join(a.registro, f'certificado-{hoje}{'' if LANG == 'pt' else '-' + LANG}.html')
-    open(saida, 'w', encoding='utf-8').write(montar(rel, curva, a.nome, origem))
+    open(saida, 'w', encoding='utf-8').write(montar(rel, curva, a.nome, origem, pouco))
     print(T['cert']['saida'].format(arq=os.path.abspath(saida)))
 
 
