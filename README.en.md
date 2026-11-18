@@ -86,6 +86,8 @@ Terminal, Python 3.9 or newer (standard library only, nothing to install), and g
 
 [exemplo/relatorio-agregado.json](exemplo/relatorio-agregado.json) (in Portuguese): measurement of Nei Maldaner’s (INEMA) work over 30 days, totals only (no requests, folders, or sites).
 
+[exemplo/avanco-al5.en.md](exemplo/avanco-al5.en.md): how far we have come at AL5 — 97,066 automated runs across 62 routines, 99.9% success, 919 hours returned, and why AL5 looks smaller than it is when counted by time.
+
 ## Tests
 
 `python3 tests/run.py` (46 tests with fake logs; nothing from your machine).

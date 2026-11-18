@@ -87,6 +87,8 @@ Terminal, Python 3.9 ou mais novo (só biblioteca padrão, sem instalar nada) e 
 
 [exemplo/relatorio-agregado.json](exemplo/relatorio-agregado.json): a medição do trabalho do Nei Maldaner (INEMA) em 30 dias, só com totais (sem pedidos, pastas nem sites).
 
+[exemplo/avanco-al5.md](exemplo/avanco-al5.md): até onde já chegamos no AL5 — 97.066 execuções automáticas em 62 rotinas, 99,9% de acerto, 919 horas devolvidas, e por que o AL5 parece menor do que é quando a conta é por tempo.
+
 ## Testes
 
 `python3 tests/run.py` (46 testes com logs falsos, nada da sua máquina).
